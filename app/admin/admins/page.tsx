@@ -59,9 +59,9 @@ import {
   EyeOff,
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { toast } from "sonner"
-import { signUp } from "@/lib/auth-client";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { signUpEmailAction } from "@/actions/sign-up-email.action";
 
 const emptyAdmin = {
   name: "",
@@ -175,8 +175,8 @@ export default function AdminAdminsPage() {
     if (!deletingId) return;
 
     // Prevent deleting yourself
-    if (deletingId === currentUser?.id) { 
-      toast.error("Vous ne pouvez pas supprimer votre propre compte.")
+    if (deletingId === currentUser?.id) {
+      toast.error("Vous ne pouvez pas supprimer votre propre compte.");
       setIsDeleteOpen(false);
       setDeletingId(null);
       return;
@@ -189,7 +189,9 @@ export default function AdminAdminsPage() {
         (a) => a.role === "super_admin",
       ).length;
       if (superAdminCount <= 1) {
-        toast.error("Vous ne pouvez pas supprimer le dernier super administrateur.")
+        toast.error(
+          "Vous ne pouvez pas supprimer le dernier super administrateur.",
+        );
         setIsDeleteOpen(false);
         setDeletingId(null);
         return;
@@ -199,9 +201,9 @@ export default function AdminAdminsPage() {
     try {
       deleteAdmin(deletingId);
       setAdminsState(getAdmins());
-       toast.success("L'administrateur a ete supprime avec succes.")
+      toast.success("L'administrateur a ete supprime avec succes.");
     } catch {
-      toast.error("Impossible de supprimer l'administrateur.")
+      toast.error("Impossible de supprimer l'administrateur.");
     } finally {
       setIsDeleteOpen(false);
       setDeletingId(null);
@@ -210,42 +212,23 @@ export default function AdminAdminsPage() {
 
   async function handleSubmit(evt: React.FormEvent<HTMLFormElement>) {
     evt.preventDefault();
-    
+
+    setIsPending(true);
+
     const formData = new FormData(evt.target as HTMLFormElement);
 
-    const name = String(formData.get("name"));
-    if (!name) return toast.error("Entrez un nom");
+    const { error } = await signUpEmailAction(formData);
 
-    const email = String(formData.get("email"));
-    if (!email) return toast.error("Entrez un email");
+    if (error) {
+      toast.error(error);
+      setIsPending(false);
+    } else {
+      toast.success("Utilisateur ajouté");
+      router.push("/admin/admins");
+    }
 
-    const password = String(formData.get("password"));
-    if (!password) return toast.error("Entrez un mot de passe");
-
-    // console.log({ name, email, password });
-
-    await signUp.email(
-      {
-        name,
-        email,
-        password
-      },
-      {
-        onRequest: () => {
-          setIsPending(true)
-        },
-        onResponse: () => {
-          setIsPending(false)
-        },
-        onError: (ctx) => {
-          toast.error(ctx.error.message)
-        },
-        onSuccess: () => {
-          router.push("/admin/admins")
-          toast.success("Utilisateur ajouté")
-        },
-      }
-    )
+    setIsPending(false);
+    setIsDialogOpen(false)
   }
 
   // if (isLoading) {

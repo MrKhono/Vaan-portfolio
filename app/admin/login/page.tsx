@@ -16,7 +16,7 @@ import {
 import { Camera, Loader2, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { signIn, signUp } from "@/lib/auth-client";
+import { signInEmailAction } from "@/actions/sign-in-email.action";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
@@ -54,40 +54,25 @@ export default function AdminLoginPage() {
   //   }
   // }
 
-  async function handleSubmit(evt: React.FormEvent<HTMLFormElement>) {
-    evt.preventDefault();
-    console.log("Done")
-
-    const formData = new FormData(evt.target as HTMLFormElement);
-
-    const email = String(formData.get("email"));
-    if (!email) return toast.error("Entrez un email");
-
-    const password = String(formData.get("password"));
-    if (!password) return toast.error("Entrez un mot de passe");
-
-    await signIn.email(
-      {
-        email,
-        password,
-      },
-      {
-        onRequest: () => {
-          setIsPending(true)
-        },
-        onResponse: () => {
-          setIsPending(false)
-        },
-        onError: (ctx) => {
-          toast.error(ctx.error.message);
-        },
-        onSuccess: () => {
-          toast.success("Connexion réussi !")
-          router.push("/admin")
-        },
-      },
-    );
-  }
+   async function handleSubmit(evt: React.FormEvent<HTMLFormElement>) {
+      evt.preventDefault();
+  
+      setIsPending(true);
+  
+      const formData = new FormData(evt.target as HTMLFormElement);
+  
+      const { error } = await signInEmailAction(formData);
+  
+      if (error) {
+        toast.error(error);
+        setIsPending(false);
+      } else {
+        toast.success("Connexion résussie");
+        router.push("/admin");
+      }
+  
+      setIsPending(false);
+    }
 
   // if (isLoading) {
   //   return (
