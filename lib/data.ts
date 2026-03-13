@@ -136,7 +136,7 @@ export const projects: Project[] = [
     lens: "135mm f/1.8 GM",
   },
   {
-    id: "portrait-antoine",
+    id: "portrait-david",
     title: "Antoine - Corporate",
     category: "portrait",
     coverImage: "/images/portrait-2.jpg",

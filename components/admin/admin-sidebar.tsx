@@ -41,7 +41,7 @@ import {
   getUnreadNotificationsCount,
 } from "@/lib/admin-store";
 import { useEffect, useState } from "react";
-import { signOut } from "@/lib/auth-client";
+import { signOut, useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 
 const navigation = [
@@ -81,7 +81,7 @@ export function AdminSidebar() {
   const [unreadCount, setUnreadCount] = useState(0);
   const user = "Armand Khono";
 
-   const [isPending, setIsPending] = useState(false);
+  const { data: session, isPending } = useSession();
 
   useEffect(() => {
     const updateCounts = () => {
@@ -98,17 +98,13 @@ export function AdminSidebar() {
   async function handleClick() {
     await signOut({
       fetchOptions: {
-         onRequest: () => {
-          setIsPending(true)
-        },
-        onResponse: () => {
-          setIsPending(false)
-        },
+        onRequest: () => {},
+        onResponse: () => {},
         onError: (ctx) => {
           toast.error(ctx.error.message);
         },
         onSuccess: () => {
-          toast.success("Déconnexion réussie !")
+          toast.success("Déconnexion réussie !");
           router.push("/admin/login");
           // logout()
         },
@@ -130,7 +126,7 @@ export function AdminSidebar() {
         <div className="flex flex-col">
           <span className="font-serif text-lg font-semibold">Admin</span>
           <span className="text-xs text-muted-foreground">
-            Alexandre Dubois
+            {session?.user.name}
           </span>
         </div>
       </div>
@@ -190,14 +186,14 @@ export function AdminSidebar() {
                   }
                 />
                 <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                  {user
+                  {session?.user.name
                     ?.split(" ")
                     .map((n) => n[0])
                     .join("") || "AD"}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-1 flex-col items-start text-left">
-                <span className="text-sm font-medium">{user}</span>
+                <span className="text-sm font-medium">{session?.user.name}</span>
                 {/* <span className="text-xs text-muted-foreground">{user?.role === "super_admin" ? "Super Admin" : "Admin"}</span> */}
               </div>
               <ChevronDown className="h-4 w-4 text-muted-foreground" />

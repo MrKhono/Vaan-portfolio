@@ -111,27 +111,6 @@ export default function AdminHeroPage() {
                 rows={4}
               />
             </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="ctaText">Texte du bouton</Label>
-                <Input
-                  id="ctaText"
-                  value={hero.ctaText}
-                  onChange={(e) => setHeroState({ ...hero, ctaText: e.target.value })}
-                  placeholder="Decouvrir"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="ctaLink">Lien du bouton</Label>
-                <Input
-                  id="ctaLink"
-                  value={hero.ctaLink}
-                  onChange={(e) => setHeroState({ ...hero, ctaLink: e.target.value })}
-                  placeholder="/portfolio"
-                />
-              </div>
-            </div>
           </CardContent>
         </Card>
 

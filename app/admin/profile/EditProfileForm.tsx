@@ -1,17 +1,23 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Camera, Save, Loader2, Eye, EyeOff, User } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { updateAdmin, getCurrentUser, type Admin } from "@/lib/admin-store"
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Camera, Save, Loader2, Eye, EyeOff, User } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { updateAdmin, getCurrentUser, type Admin } from "@/lib/admin-store";
 
 interface EditProfileFormProps {
-  user: Admin
+  user: Admin;
 }
 
 export default function EditProfileForm({ user }: EditProfileFormProps) {
@@ -19,13 +25,14 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
     name: "",
     email: "",
     avatar: "",
+    avatarFile: null as File | null,
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
-  })
-  const [isSaving, setIsSaving] = useState(false)
-  const [showPasswords, setShowPasswords] = useState(false)
-  const { toast } = useToast()
+  });
+  const [isSaving, setIsSaving] = useState(false);
+  const [showPasswords, setShowPasswords] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (user) {
@@ -33,46 +40,61 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
         name: user.name,
         email: user.email,
         avatar: user.avatar || "",
+        avatarFile: null,
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
-      })
+      });
     }
-  }, [user])
+  }, [user]);
 
   const handleSaveProfile = async () => {
-    if (!user) return
+    if (!user) return;
 
     if (!formData.name.trim() || !formData.email.trim()) {
-      toast({ title: "Erreur", description: "Le nom et l'email sont requis.", variant: "destructive" })
-      return
+      toast({
+        title: "Erreur",
+        description: "Le nom et l'email sont requis.",
+        variant: "destructive",
+      });
+      return;
     }
 
-    setIsSaving(true)
+    setIsSaving(true);
     try {
       updateAdmin(user.id, {
         name: formData.name,
         email: formData.email,
         avatar: formData.avatar,
-      })
+      });
 
-      const updatedUser = getCurrentUser()
+      const updatedUser = getCurrentUser();
       if (updatedUser) {
-        localStorage.setItem("admin_current_user", JSON.stringify({
-          ...updatedUser,
-          name: formData.name,
-          email: formData.email,
-          avatar: formData.avatar,
-        }))
+        localStorage.setItem(
+          "admin_current_user",
+          JSON.stringify({
+            ...updatedUser,
+            name: formData.name,
+            email: formData.email,
+            avatar: formData.avatar,
+          }),
+        );
       }
 
-      toast({ title: "Profil mis à jour", description: "Vos informations ont été enregistrées." })
+      toast({
+        title: "Profil mis à jour",
+        description: "Vos informations ont été enregistrées.",
+      });
     } catch {
-      toast({ title: "Erreur", description: "Impossible de mettre à jour le profil.", variant: "destructive" })
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour le profil.",
+        variant: "destructive",
+      });
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   return (
     <Card className="lg:col-span-2">
@@ -91,7 +113,9 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               placeholder="Votre nom"
             />
           </div>
@@ -101,22 +125,36 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
               id="email"
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
               placeholder="votre@email.fr"
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="avatar">Photo de profil (URL)</Label>
-          <div className="flex gap-3">
+          <Label htmlFor="avatar">Photo de profil</Label>
+
+          <div className="flex gap-3 items-center">
             <Input
+              type="file"
               id="avatar"
-              value={formData.avatar}
-              onChange={(e) => setFormData({ ...formData, avatar: e.target.value })}
-              placeholder="/images/avatar.jpg"
+              accept="image/*"
               className="flex-1"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const preview = URL.createObjectURL(file);
+                  setFormData({
+                    ...formData,
+                    avatar: preview,
+                    avatarFile: file,
+                  });
+                }
+              }}
             />
+
             {formData.avatar && (
               <Avatar className="h-10 w-10">
                 <AvatarImage src={formData.avatar} />
@@ -130,11 +168,15 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
 
         <div className="flex justify-end pt-2">
           <Button onClick={handleSaveProfile} disabled={isSaving}>
-            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            {isSaving ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-2 h-4 w-4" />
+            )}
             Enregistrer
           </Button>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
