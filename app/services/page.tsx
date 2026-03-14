@@ -7,7 +7,7 @@ import { getServicesAction } from "@/actions/service.actions"
 export const metadata: Metadata = {
   title: "Services",
   description:
-    "Découvrez les prestations photographiques d'Alexandre Dupont : mariage, portrait, mode et événementiel. Tarifs et formules adaptées à vos besoins.",
+    "Découvrez les prestations photographiques de Vaan Charles : mariage, portrait, mode et événementiel. Tarifs et formules adaptées à vos besoins.",
 }
 
 export default async function ServicesPage() {

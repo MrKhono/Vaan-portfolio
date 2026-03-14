@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { AdminShell } from "@/components/admin/admin-shell"
-import { ImageUpload } from "@/components/admin/image-upload"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useEffect, useState } from "react";
+import { AdminShell } from "@/components/admin/admin-shell";
+import { ImageUpload } from "@/components/admin/image-upload";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +14,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,130 +24,160 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import {
-  getPartners,
-  addPartner,
-  updatePartner,
-  deletePartner,
-  type Partner,
-} from "@/lib/admin-store"
-import { Plus, Loader2, Pencil, Trash2, Handshake, ExternalLink, ImageIcon } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import Image from "next/image"
+} from "@/components/ui/alert-dialog";
 
-const emptyPartner = {
+import {
+  getPartnersAction,
+  createPartnerAction,
+  updatePartnerAction,
+  deletePartnerAction,
+  type Partner,
+  type PartnerData,
+} from "@/actions/partner.actions";
+
+import {
+  Plus,
+  Loader2,
+  Pencil,
+  Trash2,
+  Handshake,
+  ExternalLink,
+} from "lucide-react";
+
+import { useToast } from "@/hooks/use-toast";
+import Image from "next/image";
+
+const emptyPartner: PartnerData = {
   name: "",
   logo: "",
   website: "",
-}
+};
 
 export default function AdminPartnersPage() {
-  const [partners, setPartnersState] = useState<Partner[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
-  const [editingPartner, setEditingPartner] = useState<Partner | null>(null)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [formData, setFormData] = useState(emptyPartner)
-  const { toast } = useToast()
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+  const [editingPartner, setEditingPartner] = useState<Partner | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const [formData, setFormData] = useState<PartnerData>(emptyPartner);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const { toast } = useToast();
+
+  async function loadPartners() {
+    try {
+      const data = await getPartnersAction();
+      setPartners(data);
+    } catch {
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les partenaires.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   useEffect(() => {
-    setPartnersState(getPartners())
-    setIsLoading(false)
-  }, [])
+    loadPartners();
+  }, []);
 
-  const handleOpenDialog = (partner?: Partner) => {
+  function handleOpenDialog(partner?: Partner) {
     if (partner) {
-      setEditingPartner(partner)
+      setEditingPartner(partner);
       setFormData({
         name: partner.name,
         logo: partner.logo,
-        website: partner.website || "",
-      })
+        website: partner.website,
+      });
     } else {
-      setEditingPartner(null)
-      setFormData(emptyPartner)
+      setEditingPartner(null);
+      setFormData(emptyPartner);
     }
-    setIsDialogOpen(true)
+
+    setIsDialogOpen(true);
   }
 
-  const handleCloseDialog = () => {
-    setIsDialogOpen(false)
-    setEditingPartner(null)
-    setFormData(emptyPartner)
+  function handleCloseDialog() {
+    setIsDialogOpen(false);
+    setEditingPartner(null);
+    setFormData(emptyPartner);
   }
 
-  const handleSave = () => {
-    if (!formData.name.trim()) {
+  async function handleSave() {
+    setIsSaving(true);
+
+    const result = editingPartner
+      ? await updatePartnerAction(editingPartner.id, formData)
+      : await createPartnerAction(formData);
+
+    if (result.success) {
+      toast({
+        title: editingPartner ? "Partenaire modifié" : "Partenaire ajouté",
+        description: editingPartner
+          ? "Le partenaire a été mis à jour avec succès."
+          : "Le nouveau partenaire a été créé avec succès.",
+      });
+
+      await loadPartners();
+      handleCloseDialog();
+    } else {
       toast({
         title: "Erreur",
-        description: "Le nom du partenaire est requis.",
+        description: result.error ?? "Impossible d'enregistrer le partenaire.",
         variant: "destructive",
-      })
-      return
+      });
     }
 
-    try {
-      if (editingPartner) {
-        updatePartner(editingPartner.id, formData)
-        toast({
-          title: "Partenaire modifie",
-          description: "Le partenaire a ete mis a jour avec succes.",
-        })
-      } else {
-        addPartner(formData)
-        toast({
-          title: "Partenaire ajoute",
-          description: "Le nouveau partenaire a ete cree avec succes.",
-        })
-      }
-      setPartnersState(getPartners())
-      handleCloseDialog()
-    } catch {
-      toast({
-        title: "Erreur",
-        description: "Impossible d'enregistrer le partenaire.",
-        variant: "destructive",
-      })
-    }
+    setIsSaving(false);
   }
 
-  const handleDelete = () => {
-    if (!deletingId) return
-    try {
-      deletePartner(deletingId)
-      setPartnersState(getPartners())
+  async function handleDelete() {
+    if (!deletingId) return;
+
+    const result = await deletePartnerAction(deletingId);
+
+    if (result.success) {
       toast({
-        title: "Partenaire supprime",
-        description: "Le partenaire a ete supprime avec succes.",
-      })
-    } catch {
+        title: "Partenaire supprimé",
+        description: "Le partenaire a été supprimé avec succès.",
+      });
+
+      await loadPartners();
+    } else {
       toast({
         title: "Erreur",
-        description: "Impossible de supprimer le partenaire.",
+        description: result.error,
         variant: "destructive",
-      })
-    } finally {
-      setIsDeleteOpen(false)
-      setDeletingId(null)
+      });
     }
+
+    setIsDeleteOpen(false);
+    setDeletingId(null);
   }
 
   if (isLoading) {
     return (
-      <AdminShell title="Partenaires" description="Gerez vos partenaires et collaborateurs">
+      <AdminShell
+        title="Partenaires"
+        description="Gérez vos partenaires et collaborateurs"
+      >
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       </AdminShell>
-    )
+    );
   }
 
   return (
     <AdminShell
       title="Partenaires"
-      description="Gerez vos partenaires et collaborateurs"
+      description="Gérez vos partenaires et collaborateurs"
       actions={
         <Button onClick={() => handleOpenDialog()}>
           <Plus className="mr-2 h-4 w-4" />
@@ -155,24 +185,24 @@ export default function AdminPartnersPage() {
         </Button>
       }
     >
-      {/* Partners grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {partners.map((partner) => (
-          <Card key={partner.id} className="group">
+          <Card key={partner.id}>
             <CardContent className="p-6">
               <div className="flex flex-col items-center text-center">
-                {/* Logo */}
-                <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-lg bg-muted">
+                <div className="mb-4 relative h-20 w-20 overflow-hidden rounded-lg bg-muted">
                   {partner.logo ? (
                     <Image
                       src={partner.logo}
                       alt={partner.name}
-                      width={64}
-                      height={64}
-                      className="object-contain"
+                      fill
+                      className="object-cover"
+                      unoptimized
                     />
                   ) : (
-                    <Handshake className="h-8 w-8 text-muted-foreground" />
+                    <div className="flex h-full w-full items-center justify-center">
+                      <Handshake className="h-8 w-8 text-muted-foreground" />
+                    </div>
                   )}
                 </div>
 
@@ -199,13 +229,14 @@ export default function AdminPartnersPage() {
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
+
                   <Button
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-destructive hover:text-destructive"
                     onClick={() => {
-                      setDeletingId(partner.id)
-                      setIsDeleteOpen(true)
+                      setDeletingId(partner.id);
+                      setIsDeleteOpen(true);
                     }}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -219,11 +250,14 @@ export default function AdminPartnersPage() {
         {partners.length === 0 && (
           <Card className="col-span-full">
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <Handshake className="h-12 w-12 text-muted-foreground mb-4" />
+              <Handshake className="mb-4 h-12 w-12 text-muted-foreground" />
+
               <h3 className="font-medium">Aucun partenaire</h3>
-              <p className="text-sm text-muted-foreground mt-1">
+
+              <p className="mt-1 text-sm text-muted-foreground">
                 Ajoutez vos partenaires et collaborateurs
               </p>
+
               <Button className="mt-4" onClick={() => handleOpenDialog()}>
                 <Plus className="mr-2 h-4 w-4" />
                 Ajouter un partenaire
@@ -233,13 +267,17 @@ export default function AdminPartnersPage() {
         )}
       </div>
 
-      {/* Edit/Create Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={(open) => !open && handleCloseDialog()}>
+      {/* Dialog création / édition */}
+      <Dialog
+        open={isDialogOpen}
+        onOpenChange={(open) => !open && handleCloseDialog()}
+      >
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>
               {editingPartner ? "Modifier le partenaire" : "Nouveau partenaire"}
             </DialogTitle>
+
             <DialogDescription>
               {editingPartner
                 ? "Modifiez les informations du partenaire"
@@ -250,10 +288,16 @@ export default function AdminPartnersPage() {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nom du partenaire *</Label>
+
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    name: e.target.value,
+                  })
+                }
                 placeholder="Canon France"
               />
             </div>
@@ -261,17 +305,29 @@ export default function AdminPartnersPage() {
             <ImageUpload
               label="Logo"
               value={formData.logo}
-              onChange={(value) => setFormData({ ...formData, logo: value })}
+              onChange={(value) =>
+                setFormData({
+                  ...formData,
+                  logo: value,
+                })
+              }
               aspectRatio="square"
-              description="Logo du partenaire (format carre recommande)"
+              description="Logo du partenaire (format carré recommandé)"
             />
 
             <div className="space-y-2">
               <Label htmlFor="website">Site web</Label>
+
               <Input
                 id="website"
+                type="url"
                 value={formData.website}
-                onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    website: e.target.value,
+                  })
+                }
                 placeholder="https://www.canon.fr"
               />
             </div>
@@ -281,24 +337,38 @@ export default function AdminPartnersPage() {
             <Button variant="outline" onClick={handleCloseDialog}>
               Annuler
             </Button>
-            <Button onClick={handleSave}>
-              {editingPartner ? "Enregistrer" : "Ajouter"}
+
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Enregistrement...
+                </>
+              ) : editingPartner ? (
+                "Enregistrer"
+              ) : (
+                "Ajouter"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete confirmation */}
+      {/* Confirmation suppression */}
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Supprimer ce partenaire ?</AlertDialogTitle>
+
             <AlertDialogDescription>
-              Cette action est irreversible. Le partenaire sera definitivement supprime.
+              Cette action est irréversible. Le partenaire sera définitivement
+              supprimé.
             </AlertDialogDescription>
           </AlertDialogHeader>
+
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
+
             <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -309,5 +379,5 @@ export default function AdminPartnersPage() {
         </AlertDialogContent>
       </AlertDialog>
     </AdminShell>
-  )
+  );
 }

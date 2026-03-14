@@ -1,11 +1,12 @@
-"use client"
-
 import Link from "next/link"
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/motion"
-import { projects } from "@/lib/data"
+import { getProjectsAction } from "@/actions/project.actions"
 
-export function GalleryPreview() {
-  const previewProjects = projects.slice(0, 6)
+export async function GalleryPreview() {
+  const allProjects    = await getProjectsAction()
+  const previewProjects = allProjects.slice(0, 6)
+
+  if (previewProjects.length === 0) return null
 
   return (
     <section className="bg-secondary/30 px-6 py-24 lg:px-8 lg:py-32">
@@ -15,7 +16,7 @@ export function GalleryPreview() {
             Portfolio
           </p>
           <h2 className="font-serif text-4xl font-semibold text-foreground md:text-5xl">
-            Travaux Recents
+            Travaux Récents
           </h2>
         </FadeIn>
 
@@ -27,10 +28,14 @@ export function GalleryPreview() {
                 className="group relative block overflow-hidden rounded-xl"
               >
                 <div
-                  className={i % 3 === 0 ? "aspect-3/4" : i % 3 === 1 ? "aspect-square" : "aspect-4/3"}
+                  className={
+                    i % 3 === 0 ? "aspect-3/4" :
+                    i % 3 === 1 ? "aspect-square" :
+                    "aspect-4/3"
+                  }
                 >
                   <img
-                    src={project.coverImage}
+                    src={project.coverImage || "/images/placeholder.jpg"}
                     alt={project.title}
                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
@@ -38,7 +43,7 @@ export function GalleryPreview() {
                 <div className="absolute inset-0 flex items-end bg-linear-to-t from-[#0F0F0F]/70 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100">
                   <div className="p-6">
                     <p className="text-xs font-medium uppercase tracking-wider text-[#D6C6B8]">
-                      {project.category}
+                      {project.domain.name}
                     </p>
                     <h3 className="mt-1 font-serif text-xl font-semibold text-[#F8F8F8]">
                       {project.title}

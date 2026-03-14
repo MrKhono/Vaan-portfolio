@@ -26,42 +26,56 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import {
-  getExperiences,
-  addExperience,
-  updateExperience,
-  deleteExperience,
+  getExperiencesAction,
+  createExperienceAction,
+  updateExperienceAction,
+  deleteExperienceAction,
   type Experience,
-} from "@/lib/admin-store"
-import { Plus, Loader2, Pencil, Trash2, Award, Calendar } from "lucide-react"
+  type ExperienceData,
+} from "@/actions/experience.actions"
+import { Plus, Loader2, Pencil, Trash2, Award } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
-const emptyExperience = {
-  year: "",
-  title: "",
+const emptyExperience: ExperienceData = {
+  year:        "",
+  title:       "",
   description: "",
 }
 
 export default function AdminExperiencePage() {
-  const [experiences, setExperiencesState] = useState<Experience[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+  const [experiences, setExperiences]         = useState<Experience[]>([])
+  const [isLoading, setIsLoading]             = useState(true)
+  const [isDialogOpen, setIsDialogOpen]       = useState(false)
+  const [isDeleteOpen, setIsDeleteOpen]       = useState(false)
   const [editingExperience, setEditingExperience] = useState<Experience | null>(null)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [formData, setFormData] = useState(emptyExperience)
+  const [deletingId, setDeletingId]           = useState<string | null>(null)
+  const [formData, setFormData]               = useState<ExperienceData>(emptyExperience)
+  const [isSaving, setIsSaving]               = useState(false)
   const { toast } = useToast()
 
-  useEffect(() => {
-    setExperiencesState(getExperiences())
-    setIsLoading(false)
-  }, [])
+  async function loadExperiences() {
+    try {
+      const data = await getExperiencesAction()
+      setExperiences(data)
+    } catch {
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les expériences.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
-  const handleOpenDialog = (experience?: Experience) => {
+  useEffect(() => { loadExperiences() }, [])
+
+  function handleOpenDialog(experience?: Experience) {
     if (experience) {
       setEditingExperience(experience)
       setFormData({
-        year: experience.year,
-        title: experience.title,
+        year:        experience.year,
+        title:       experience.title,
         description: experience.description,
       })
     } else {
@@ -71,76 +85,70 @@ export default function AdminExperiencePage() {
     setIsDialogOpen(true)
   }
 
-  const handleCloseDialog = () => {
+  function handleCloseDialog() {
     setIsDialogOpen(false)
     setEditingExperience(null)
     setFormData(emptyExperience)
   }
 
-  const handleSave = () => {
-    if (!formData.year.trim() || !formData.title.trim()) {
-      toast({
-        title: "Erreur",
-        description: "L'annee et le titre sont requis.",
-        variant: "destructive",
-      })
-      return
-    }
+  async function handleSave() {
+    setIsSaving(true)
 
-    try {
-      if (editingExperience) {
-        updateExperience(editingExperience.id, formData)
-        toast({
-          title: "Experience modifiee",
-          description: "L'experience a ete mise a jour avec succes.",
-        })
-      } else {
-        addExperience(formData)
-        toast({
-          title: "Experience ajoutee",
-          description: "La nouvelle experience a ete creee avec succes.",
-        })
-      }
-      setExperiencesState(getExperiences())
+    const result = editingExperience
+      ? await updateExperienceAction(editingExperience.id, formData)
+      : await createExperienceAction(formData)
+
+    if (result.success) {
+      toast({
+        title: editingExperience ? "Expérience modifiée" : "Expérience ajoutée",
+        description: editingExperience
+          ? "L'expérience a été mise à jour avec succès."
+          : "La nouvelle expérience a été créée avec succès.",
+      })
+      await loadExperiences()
       handleCloseDialog()
-    } catch {
+    } else {
       toast({
         title: "Erreur",
-        description: "Impossible d'enregistrer l'experience.",
+        description: result.error ?? "Impossible d'enregistrer l'expérience.",
         variant: "destructive",
       })
     }
+
+    setIsSaving(false)
   }
 
-  const handleDelete = () => {
+  async function handleDelete() {
     if (!deletingId) return
-    try {
-      deleteExperience(deletingId)
-      setExperiencesState(getExperiences())
+
+    const result = await deleteExperienceAction(deletingId)
+
+    if (result.success) {
       toast({
-        title: "Experience supprimee",
-        description: "L'experience a ete supprimee avec succes.",
+        title: "Expérience supprimée",
+        description: "L'expérience a été supprimée avec succès.",
       })
-    } catch {
+      await loadExperiences()
+    } else {
       toast({
         title: "Erreur",
-        description: "Impossible de supprimer l'experience.",
+        description: result.error,
         variant: "destructive",
       })
-    } finally {
-      setIsDeleteOpen(false)
-      setDeletingId(null)
     }
+
+    setIsDeleteOpen(false)
+    setDeletingId(null)
   }
 
-  // Sort experiences by year (most recent first)
-  const sortedExperiences = [...experiences].sort((a, b) => 
-    parseInt(b.year) - parseInt(a.year)
+  // Tri par année décroissante
+  const sortedExperiences = [...experiences].sort(
+    (a, b) => parseInt(b.year) - parseInt(a.year)
   )
 
   if (isLoading) {
     return (
-      <AdminShell title="Experience" description="Gerez votre parcours et vos realisations">
+      <AdminShell title="Expérience" description="Gérez votre parcours et vos réalisations">
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
@@ -150,39 +158,40 @@ export default function AdminExperiencePage() {
 
   return (
     <AdminShell
-      title="Experience"
-      description="Gerez votre parcours et vos realisations"
+      title="Expérience"
+      description="Gérez votre parcours et vos réalisations"
       actions={
         <Button onClick={() => handleOpenDialog()}>
           <Plus className="mr-2 h-4 w-4" />
-          Nouvelle experience
+          Nouvelle expérience
         </Button>
       }
     >
-      {/* Timeline */}
       <Card>
         <CardContent className="p-6">
           {sortedExperiences.length > 0 ? (
             <div className="relative">
-              {/* Timeline line */}
-              <div className="absolute left-[27px] top-0 bottom-0 w-px bg-border" />
+              {/* Ligne de timeline */}
+              <div className="absolute bottom-0 left-[27px] top-0 w-px bg-border" />
 
               <div className="space-y-6">
-                {sortedExperiences.map((experience, index) => (
+                {sortedExperiences.map((experience) => (
                   <div key={experience.id} className="relative flex gap-4">
-                    {/* Year badge */}
-                    <div className="relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold text-sm">
+                    {/* Badge année */}
+                    <div className="relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
                       {experience.year}
                     </div>
 
-                    {/* Content */}
+                    {/* Contenu */}
                     <div className="flex-1 pt-2">
                       <div className="flex items-start justify-between gap-4">
                         <div>
                           <h3 className="font-semibold">{experience.title}</h3>
-                          <p className="mt-1 text-sm text-muted-foreground">
-                            {experience.description}
-                          </p>
+                          {experience.description && (
+                            <p className="mt-1 text-sm text-muted-foreground">
+                              {experience.description}
+                            </p>
+                          )}
                         </div>
                         <div className="flex shrink-0 gap-1">
                           <Button
@@ -197,10 +206,7 @@ export default function AdminExperiencePage() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-destructive hover:text-destructive"
-                            onClick={() => {
-                              setDeletingId(experience.id)
-                              setIsDeleteOpen(true)
-                            }}
+                            onClick={() => { setDeletingId(experience.id); setIsDeleteOpen(true) }}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -213,37 +219,37 @@ export default function AdminExperiencePage() {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-12">
-              <Award className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="font-medium">Aucune experience</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                Ajoutez vos realisations et etapes importantes
+              <Award className="mb-4 h-12 w-12 text-muted-foreground" />
+              <h3 className="font-medium">Aucune expérience</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Ajoutez vos réalisations et étapes importantes
               </p>
               <Button className="mt-4" onClick={() => handleOpenDialog()}>
                 <Plus className="mr-2 h-4 w-4" />
-                Ajouter une experience
+                Ajouter une expérience
               </Button>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Edit/Create Dialog */}
+      {/* Dialog création / édition */}
       <Dialog open={isDialogOpen} onOpenChange={(open) => !open && handleCloseDialog()}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>
-              {editingExperience ? "Modifier l'experience" : "Nouvelle experience"}
+              {editingExperience ? "Modifier l'expérience" : "Nouvelle expérience"}
             </DialogTitle>
             <DialogDescription>
               {editingExperience
-                ? "Modifiez les informations de l'experience"
-                : "Ajoutez une nouvelle etape a votre parcours"}
+                ? "Modifiez les informations de l'expérience"
+                : "Ajoutez une nouvelle étape à votre parcours"}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="year">Annee *</Label>
+              <Label htmlFor="year">Année *</Label>
               <Input
                 id="year"
                 value={formData.year}
@@ -251,7 +257,6 @@ export default function AdminExperiencePage() {
                 placeholder="2024"
               />
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="title">Titre *</Label>
               <Input
@@ -261,37 +266,38 @@ export default function AdminExperiencePage() {
                 placeholder="Prix du meilleur photographe"
               />
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Decrivez cette experience..."
+                placeholder="Décrivez cette expérience..."
                 rows={3}
               />
             </div>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={handleCloseDialog}>
-              Annuler
-            </Button>
-            <Button onClick={handleSave}>
-              {editingExperience ? "Enregistrer" : "Ajouter"}
+            <Button variant="outline" onClick={handleCloseDialog}>Annuler</Button>
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Enregistrement...</>
+              ) : (
+                editingExperience ? "Enregistrer" : "Ajouter"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete confirmation */}
+      {/* Confirmation suppression */}
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Supprimer cette experience ?</AlertDialogTitle>
+            <AlertDialogTitle>Supprimer cette expérience ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action est irreversible. L&apos;experience sera definitivement supprimee.
+              Cette action est irréversible. L&apos;expérience sera définitivement supprimée.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

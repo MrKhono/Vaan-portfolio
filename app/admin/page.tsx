@@ -59,9 +59,9 @@ const quickLinks = [
     color: "bg-green-500",
   },
   {
-    name: "Nouvel article",
-    href: "/admin/blog?new=true",
-    icon: FileText,
+    name: "Nouveau service",
+    href: "/admin/services",
+    icon: Briefcase,
     color: "bg-purple-500",
   },
   {

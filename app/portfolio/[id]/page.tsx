@@ -1,24 +1,25 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { projects } from "@/lib/data"
 import { ProjectDetailContent } from "@/components/portfolio/project-detail-content"
+import { getProjectsAction } from "@/actions/project.actions"
 
 export async function generateStaticParams() {
-  return projects.map((project) => ({ id: project.id }))
+  const projects = await getProjectsAction()
+  return projects.map((p) => ({ id: p.id }))
 }
 
-export async function generateMetadata({
-  params,
-}: {
+export async function generateMetadata({ params,}: {
   params: Promise<{ id: string }>
 }): Promise<Metadata> {
-  const { id } = await params
-  const project = projects.find((p) => p.id === id)
+  const { id }   = await params
+  const projects = await getProjectsAction()
+  const project  = projects.find((p) => p.id === id)
+
   if (!project) return { title: "Projet introuvable" }
 
   return {
-    title: project.title,
-    description: project.description,
+    title:       project.title,
+    description: project.description || `Projet ${project.title} — ${project.domain.name}`,
   }
 }
 
@@ -27,14 +28,15 @@ export default async function ProjectDetailPage({
 }: {
   params: Promise<{ id: string }>
 }) {
-  const { id } = await params
-  const project = projects.find((p) => p.id === id)
-  if (!project) notFound()
+  const { id }   = await params
+  const projects = await getProjectsAction()
+  const index    = projects.findIndex((p) => p.id === id)
 
-  const currentIndex = projects.findIndex((p) => p.id === id)
-  const prevProject = currentIndex > 0 ? projects[currentIndex - 1] : null
-  const nextProject =
-    currentIndex < projects.length - 1 ? projects[currentIndex + 1] : null
+  if (index === -1) notFound()
+
+  const project     = projects[index]
+  const prevProject = index > 0 ? projects[index - 1] : null
+  const nextProject = index < projects.length - 1 ? projects[index + 1] : null
 
   return (
     <ProjectDetailContent

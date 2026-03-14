@@ -32,6 +32,7 @@ import {
   updateAboutAction,
 } from "@/actions/about.actions";
 import { toast } from "sonner";
+import { RichTextEditor } from "./rich-text-editor";
 
 const emptyStatForm: AboutStat = { value: "", label: "" };
 const emptyValueForm: AboutValue = {
@@ -87,7 +88,7 @@ export default function AdminAboutPage() {
     if (result.success) {
       toast.success("La section À propos a été mise à jour avec succès.");
     } else {
-      toast.error(result.error ?? "Impossible d'enregistrer." )
+      toast.error(result.error ?? "Impossible d'enregistrer.");
     }
     setIsSaving(false);
   };
@@ -112,7 +113,7 @@ export default function AdminAboutPage() {
 
   const saveStat = () => {
     if (!statForm.value.trim() || !statForm.label.trim()) {
-      toast.error("Tous les champs sont requis")
+      toast.error("Tous les champs sont requis");
       return;
     }
     const newStats = [...about.stats];
@@ -152,7 +153,7 @@ export default function AdminAboutPage() {
 
   const saveValue = () => {
     if (!valueForm.title.trim() || !valueForm.description.trim()) {
-      toast.error("Tous les champs sont requis")
+      toast.error("Tous les champs sont requis");
       return;
     }
     const newValues = [...about.values];
@@ -243,7 +244,7 @@ export default function AdminAboutPage() {
                 placeholder="Photographe depuis..."
               />
             </div>
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
@@ -253,6 +254,16 @@ export default function AdminAboutPage() {
                 }
                 placeholder="Votre parcours et philosophie..."
                 rows={6}
+              />
+            </div> */}
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <RichTextEditor
+                value={about.description}
+                onChange={(value) =>
+                  setAboutState({ ...about, description: value })
+                }
+                placeholder="Votre parcours et philosophie..."
               />
             </div>
           </CardContent>

@@ -1,25 +1,26 @@
-import Link from "next/link"
-import { FadeIn } from "@/components/motion"
-import { getAboutAction } from "@/actions/about.actions"
+import Link from "next/link";
+import { FadeIn } from "@/components/motion";
+import { getAboutAction } from "@/actions/about.actions";
 
 const defaultAbout = {
-  title:       "Vaan Charles",
-  description: "Depuis plus de 10 ans, je parcours le monde avec mon objectif, à la recherche de l'émotion pure et de la beauté dans chaque instant. Mon approche allie technique maîtrisée et sensibilité artistique pour créer des images qui racontent une histoire.",
-  image:       "/images/photographer.jpg",
-  stats:       [
+  title: "Vaan Charles",
+  description:
+    "Depuis plus de 10 ans, je parcours le monde avec mon objectif, à la recherche de l'émotion pure et de la beauté dans chaque instant. Mon approche allie technique maîtrisée et sensibilité artistique pour créer des images qui racontent une histoire.",
+  image: "/images/photographer.jpg",
+  stats: [
     { value: "10+", label: "Années d'expérience" },
     { value: "500+", label: "Projets réalisés" },
     { value: "150+", label: "Mariages" },
   ],
-}
+};
 
 export async function AboutPreview() {
-  const about = await getAboutAction()
+  const about = await getAboutAction();
 
-  const title       = about.title       || defaultAbout.title
-  const description = about.description || defaultAbout.description
-  const image       = about.image       || defaultAbout.image
-  const stats       = about.stats.length > 0 ? about.stats : defaultAbout.stats
+  const title = about.title || defaultAbout.title;
+  const description = about.description || defaultAbout.description;
+  const image = about.image || defaultAbout.image;
+  const stats = about.stats.length > 0 ? about.stats : defaultAbout.stats;
 
   return (
     <section className="bg-background px-6 py-24 lg:px-8 lg:py-32">
@@ -39,9 +40,13 @@ export async function AboutPreview() {
           <h2 className="font-serif text-4xl font-semibold text-foreground md:text-5xl">
             {title}
           </h2>
-          <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
+          {/* <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
             {description}
-          </p>
+          </p> */}
+          <p
+            className="mt-6 text-lg leading-relaxed text-muted-foreground"
+            dangerouslySetInnerHTML={{ __html: description }}
+          />
 
           {/* Statistiques */}
           {stats.length > 0 && (
@@ -68,5 +73,5 @@ export async function AboutPreview() {
         </FadeIn>
       </div>
     </section>
-  )
+  );
 }

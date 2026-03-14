@@ -7,7 +7,7 @@ import { getSettingsAction } from "@/actions/settings.actions"
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Contactez Alexandre Dupont pour votre projet photographique. Devis gratuit et réponse sous 24h.",
+    "Contactez Vaan Charles pour votre projet photographique. Devis gratuit et réponse sous 24h.",
 }
 
 export default async function ContactPage() {

@@ -134,6 +134,8 @@ model Domain {
   description String
   image       String
 
+  projects Project[]
+
   @@map("domains")
 }
 
@@ -196,4 +198,61 @@ model AboutValue {
   about       About    @relation(fields: [aboutId], references: [id], onDelete: Cascade)
 
   @@map("about_values")
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  title       String
+  description String?
+  coverImage  String   @default("")
+  images      String[]
+  date        String   @default("")
+  location    String   @default("")
+  client      String   @default("")
+  camera      String   @default("")
+  lens        String   @default("")
+
+  domainId    String
+  domain      Domain   @relation(fields: [domainId], references: [id], onDelete: Restrict)
+
+  @@map("projects")
+}
+model Testimonial {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name      String
+  title     String   @default("")
+  content   String
+
+  @@map("testimonials")
+}
+
+model Experience {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  year        String
+  title       String
+  description String?
+  order       Int      @default(0)
+
+  @@map("experiences")
+}
+
+model Partner {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name      String
+  logo      String   @default("")
+  website   String   @default("")
+
+  @@map("partners")
 }

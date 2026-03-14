@@ -6,45 +6,64 @@ import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { Lightbox } from "@/components/lightbox"
 import { FadeIn } from "@/components/motion"
-import { projects, categories, type Category } from "@/lib/data"
 import { cn } from "@/lib/utils"
+import { Project } from "@/actions/project.actions"
+import { Domain } from "@/actions/domain.actions"
 
-export function PortfolioGrid() {
-  const searchParams = useSearchParams()
-  const initialCategory = (searchParams.get("category") as Category | "all") || "all"
-  const [activeCategory, setActiveCategory] = useState<Category | "all">(initialCategory)
-  const [lightboxOpen, setLightboxOpen] = useState(false)
-  const [lightboxIndex, setLightboxIndex] = useState(0)
+interface PortfolioGridProps {
+  projects: Project[]
+  domains:  Domain[]
+}
+
+export function PortfolioGrid({ projects, domains }: PortfolioGridProps) {
+  const searchParams  = useSearchParams()
+  const initialSlug   = searchParams.get("category") || "all"
+  const [activeSlug, setActiveSlug]           = useState<string>(initialSlug)
+  const [lightboxOpen, setLightboxOpen]       = useState(false)
+  const [lightboxIndex, setLightboxIndex]     = useState(0)
 
   const filteredProjects = useMemo(() => {
-    if (activeCategory === "all") return projects
-    return projects.filter((p) => p.category === activeCategory)
-  }, [activeCategory])
+    if (activeSlug === "all") return projects
+    return projects.filter((p) => p.domain.slug === activeSlug)
+  }, [activeSlug, projects])
 
   const lightboxImages = filteredProjects.map((p) => ({
-    src: p.coverImage,
+    src: p.coverImage || "/images/placeholder.jpg",
     alt: p.title,
   }))
 
   return (
     <>
+      {/* Filtres */}
       <FadeIn className="mb-12 flex flex-wrap items-center justify-center gap-3">
-        {categories.map((cat) => (
+        <button
+          onClick={() => setActiveSlug("all")}
+          className={cn(
+            "rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-300",
+            activeSlug === "all"
+              ? "bg-primary text-primary-foreground"
+              : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+          )}
+        >
+          Tous
+        </button>
+        {domains.map((domain) => (
           <button
-            key={cat.value}
-            onClick={() => setActiveCategory(cat.value)}
+            key={domain.id}
+            onClick={() => setActiveSlug(domain.slug)}
             className={cn(
               "rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-300",
-              activeCategory === cat.value
+              activeSlug === domain.slug
                 ? "bg-primary text-primary-foreground"
                 : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
             )}
           >
-            {cat.label}
+            {domain.name}
           </button>
         ))}
       </FadeIn>
 
+      {/* Grille */}
       <motion.div layout className="columns-1 gap-6 sm:columns-2 lg:columns-3">
         <AnimatePresence mode="popLayout">
           {filteredProjects.map((project, i) => (
@@ -60,15 +79,13 @@ export function PortfolioGrid() {
               <div className="group relative overflow-hidden rounded-xl">
                 <div
                   className={
-                    i % 3 === 0
-                      ? "aspect-[3/4]"
-                      : i % 3 === 1
-                        ? "aspect-square"
-                        : "aspect-[4/3]"
+                    i % 3 === 0 ? "aspect-3/4" :
+                    i % 3 === 1 ? "aspect-square" :
+                    "aspect-4/3"
                   }
                 >
                   <img
-                    src={project.coverImage}
+                    src={project.coverImage || "/images/placeholder.jpg"}
                     alt={project.title}
                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
@@ -78,7 +95,7 @@ export function PortfolioGrid() {
                     {project.title}
                   </h3>
                   <p className="mt-1 text-sm capitalize text-[#D6C6B8]">
-                    {project.category}
+                    {project.domain.name}
                   </p>
                   <div className="mt-4 flex gap-3">
                     <Link
@@ -88,13 +105,10 @@ export function PortfolioGrid() {
                       Voir le projet
                     </Link>
                     <button
-                      onClick={() => {
-                        setLightboxIndex(i)
-                        setLightboxOpen(true)
-                      }}
+                      onClick={() => { setLightboxIndex(i); setLightboxOpen(true) }}
                       className="rounded-lg border border-[#F8F8F8]/30 px-5 py-2 text-xs font-medium uppercase tracking-wider text-[#F8F8F8] transition-all hover:bg-[#F8F8F8]/10"
                     >
-                      Apercu
+                      Aperçu
                     </button>
                   </div>
                 </div>
@@ -104,21 +118,19 @@ export function PortfolioGrid() {
         </AnimatePresence>
       </motion.div>
 
+      {filteredProjects.length === 0 && (
+        <p className="py-24 text-center text-muted-foreground">
+          Aucun projet dans ce domaine.
+        </p>
+      )}
+
       <Lightbox
         images={lightboxImages}
         currentIndex={lightboxIndex}
         isOpen={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
-        onPrev={() =>
-          setLightboxIndex((prev) =>
-            prev === 0 ? lightboxImages.length - 1 : prev - 1
-          )
-        }
-        onNext={() =>
-          setLightboxIndex((prev) =>
-            prev === lightboxImages.length - 1 ? 0 : prev + 1
-          )
-        }
+        onPrev={() => setLightboxIndex((prev) => prev === 0 ? lightboxImages.length - 1 : prev - 1)}
+        onNext={() => setLightboxIndex((prev) => prev === lightboxImages.length - 1 ? 0 : prev + 1)}
       />
     </>
   )
