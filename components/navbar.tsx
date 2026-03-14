@@ -1,12 +1,13 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { motion, AnimatePresence } from "framer-motion"
-import { Menu, X, Sun, Moon } from "lucide-react"
-import { useTheme } from "next-themes"
-import { cn } from "@/lib/utils"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X, Sun, Moon } from "lucide-react";
+import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 const navLinks = [
   { href: "/", label: "Accueil" },
@@ -15,28 +16,28 @@ const navLinks = [
   { href: "/services", label: "Services" },
   { href: "/rendez-vous", label: "Rendez-vous" },
   { href: "/contact", label: "Contact" },
-]
+];
 
 export function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false)
-  const [isMobileOpen, setIsMobileOpen] = useState(false)
-  const [mounted, setMounted] = useState(false)
-  const pathname = usePathname()
-  const { theme, setTheme } = useTheme()
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50)
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
-    setIsMobileOpen(false)
-  }, [pathname])
+    setIsMobileOpen(false);
+  }, [pathname]);
 
   return (
     <>
@@ -45,18 +46,30 @@ export function Navbar() {
           "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
           isScrolled
             ? "bg-background/80 backdrop-blur-xl border-b border-border shadow-sm"
-            : "bg-transparent"
+            : "bg-transparent",
         )}
       >
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
-          <Link href="/" className="group relative z-10">
+          <Link
+            href="/"
+            className="group relative z-10 flex items-center gap-2"
+          >
+            <Image
+              src="/sno.png"
+              alt="Vaan Photographie"
+              width={40}
+              height={40}
+              className="object-contain bg-white rounded-full"
+              priority
+            />
+
             <span
               className={cn(
                 "font-serif text-xl font-semibold tracking-wide transition-colors duration-300 lg:text-2xl",
-                isScrolled ? "text-foreground" : "text-primary-foreground"
+                isScrolled ? "text-foreground" : "text-primary-foreground",
               )}
             >
-              Alexandre Dupont
+              Vaan Photographie
             </span>
           </Link>
 
@@ -73,7 +86,7 @@ export function Navbar() {
                       : "text-muted-foreground hover:text-foreground"
                     : pathname === link.href
                       ? "text-primary-foreground"
-                      : "text-primary-foreground/70 hover:text-primary-foreground"
+                      : "text-primary-foreground/70 hover:text-primary-foreground",
                 )}
               >
                 {link.label}
@@ -93,7 +106,7 @@ export function Navbar() {
                   "rounded-full p-2 transition-colors duration-300",
                   isScrolled
                     ? "text-muted-foreground hover:text-foreground"
-                    : "text-primary-foreground/70 hover:text-primary-foreground"
+                    : "text-primary-foreground/70 hover:text-primary-foreground",
                 )}
                 aria-label="Changer de theme"
               >
@@ -114,7 +127,7 @@ export function Navbar() {
                   "rounded-full p-2 transition-colors",
                   isScrolled
                     ? "text-muted-foreground"
-                    : "text-primary-foreground/70"
+                    : "text-primary-foreground/70",
                 )}
                 aria-label="Changer de theme"
               >
@@ -129,9 +142,7 @@ export function Navbar() {
               onClick={() => setIsMobileOpen(!isMobileOpen)}
               className={cn(
                 "relative z-10 p-2 transition-colors",
-                isScrolled
-                  ? "text-foreground"
-                  : "text-primary-foreground"
+                isScrolled ? "text-foreground" : "text-primary-foreground",
               )}
               aria-label="Ouvrir le menu"
             >
@@ -174,7 +185,7 @@ export function Navbar() {
                       "font-serif text-3xl font-medium tracking-wide transition-colors",
                       pathname === link.href
                         ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground"
+                        : "text-muted-foreground hover:text-foreground",
                     )}
                   >
                     {link.label}
@@ -186,5 +197,5 @@ export function Navbar() {
         )}
       </AnimatePresence>
     </>
-  )
+  );
 }

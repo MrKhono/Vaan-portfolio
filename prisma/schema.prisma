@@ -90,3 +90,110 @@ model Verification {
   // @@index([identifier])
   @@map("verifications")
 }
+
+model Hero {
+  id             String   @id @default(uuid())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  title          String
+  description    String
+  backgroundImage String
+}
+
+model SiteSettings {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  
+  siteName    String   @default("")
+  seoDescription String @default("")
+
+ 
+  email       String   @default("")
+  phone       String   @default("")
+  address     String   @default("")
+
+  
+  instagram   String   @default("")
+  facebook    String   @default("")
+  twitter     String   @default("")
+  linkedin    String   @default("")
+
+  @@map("site_settings")
+}
+
+model Domain {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  name        String
+  slug        String   @unique
+  description String
+  image       String
+
+  @@map("domains")
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  title       String
+  price       String
+  description String?
+  image       String   @default("")
+  features    String[] // tableau de caractéristiques
+
+  @@map("services")
+}
+
+model About {
+  id          String       @id @default(uuid())
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  title       String       @default("")
+  subtitle    String       @default("")
+  description String       @default("")
+  image       String       @default("")
+
+  stats       AboutStat[]
+  values      AboutValue[]
+
+  @@map("about")
+}
+
+model AboutStat {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  value     String
+  label     String
+  order     Int      @default(0)
+
+  aboutId   String
+  about     About    @relation(fields: [aboutId], references: [id], onDelete: Cascade)
+
+  @@map("about_stats")
+}
+
+model AboutValue {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  icon        String
+  title       String
+  description String
+  order       Int      @default(0)
+
+  aboutId     String
+  about       About    @relation(fields: [aboutId], references: [id], onDelete: Cascade)
+
+  @@map("about_values")
+}

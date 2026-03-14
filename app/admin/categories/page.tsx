@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { AdminShell } from "@/components/admin/admin-shell"
-import { ImageUpload } from "@/components/admin/image-upload"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { useEffect, useState } from "react";
+import { AdminShell } from "@/components/admin/admin-shell";
+import { ImageUpload } from "@/components/admin/image-upload";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,135 +25,152 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import {
-  getCategories,
-  addCategory,
-  updateCategory,
-  deleteCategory,
-  type CategoryItem,
-} from "@/lib/admin-store"
-import { Plus, Loader2, Pencil, Trash2, ImageIcon } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import Image from "next/image"
+} from "@/components/ui/alert-dialog";
 
-const emptyForm = {
-  value: "",
-  label: "",
-  image: "",
+import { Plus, Loader2, Pencil, Trash2, ImageIcon } from "lucide-react";
+// import { useToast } from "@/hooks/use-toast"
+import Image from "next/image";
+import {
+  createDomainAction,
+  deleteDomainAction,
+  Domain,
+  DomainData,
+  getDomainsAction,
+  updateDomainAction,
+} from "@/actions/domain.actions";
+import { toast } from "sonner";
+
+const emptyForm: DomainData = {
+  name: "",
+  slug: "",
   description: "",
-}
+  image: "",
+};
 
 export default function AdminCategoriesPage() {
-  const [categories, setCategoriesState] = useState<CategoryItem[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
-  const [editingCategory, setEditingCategory] = useState<CategoryItem | null>(null)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [formData, setFormData] = useState(emptyForm)
-  const { toast } = useToast()
+  const [domains, setDomains] = useState<Domain[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [editingDomain, setEditingDomain] = useState<Domain | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [formData, setFormData] = useState<DomainData>(emptyForm);
+  const [isSaving, setIsSaving] = useState(false);
+  // const { toast } = useToast()
+
+  async function loadDomains() {
+    try {
+      const data = await getDomainsAction();
+      setDomains(data);
+    } catch {
+      toast.error("Impossible de charger les domaines.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   useEffect(() => {
-    setCategoriesState(getCategories())
-    setIsLoading(false)
-  }, [])
+    loadDomains();
+  }, []);
 
-  const handleOpenDialog = (category?: CategoryItem) => {
-    if (category) {
-      setEditingCategory(category)
+  const handleOpenDialog = (domain?: Domain) => {
+    if (domain) {
+      setEditingDomain(domain);
       setFormData({
-        value: category.value,
-        label: category.label,
-        image: category.image,
-        description: category.description,
-      })
+        name: domain.name,
+        slug: domain.slug,
+        description: domain.description,
+        image: domain.image,
+      });
     } else {
-      setEditingCategory(null)
-      setFormData(emptyForm)
+      setEditingDomain(null);
+      setFormData(emptyForm);
     }
-    setIsDialogOpen(true)
-  }
+    setIsDialogOpen(true);
+  };
 
   const handleCloseDialog = () => {
-    setIsDialogOpen(false)
-    setEditingCategory(null)
-    setFormData(emptyForm)
-  }
+    setIsDialogOpen(false);
+    setEditingDomain(null);
+    setFormData(emptyForm);
+  };
 
-  const handleSave = () => {
-    if (!formData.label.trim()) {
-      toast({
-        title: "Erreur",
-        description: "Le nom du domaine est requis.",
-        variant: "destructive",
-      })
-      return
+  // Génère le slug depuis le nom uniquement à la création
+  const handleNameChange = (name: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      name,
+      ...(!editingDomain && {
+        slug: name
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, ""),
+      }),
+    }));
+  };
+
+  const handleSave = async () => {
+    if (!formData.name.trim()) {
+      toast.error("Le nom du domaine est requis.");
+      return;
     }
 
-    // Auto-generate slug if not provided
-    const finalValue = formData.value.trim() || formData.label.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")
+    setIsSaving(true);
 
-    try {
-      if (editingCategory) {
-        updateCategory(editingCategory.id, { ...formData, value: finalValue })
-        toast({
-          title: "Domaine modifie",
-          description: "Le domaine a ete mis a jour avec succes.",
-        })
+    const result = editingDomain
+      ? await updateDomainAction(editingDomain.id, formData)
+      : await createDomainAction(formData);
+
+    if (result.success) {
+      if (editingDomain) {
+        toast.success("Domaine modifié");
       } else {
-        addCategory({ ...formData, value: finalValue })
-        toast({
-          title: "Domaine ajoute",
-          description: "Le nouveau domaine a ete cree avec succes.",
-        })
+        toast.success("Domaine ajouté");
       }
-      setCategoriesState(getCategories())
-      handleCloseDialog()
-    } catch {
-      toast({
-        title: "Erreur",
-        description: "Impossible d'enregistrer le domaine.",
-        variant: "destructive",
-      })
+      await loadDomains();
+      handleCloseDialog();
+    } else {
+      toast.error("Impossible d'enregistrer le domaine.");
     }
-  }
 
-  const handleDelete = () => {
-    if (!deletingId) return
-    try {
-      deleteCategory(deletingId)
-      setCategoriesState(getCategories())
-      toast({
-        title: "Domaine supprime",
-        description: "Le domaine a ete supprime avec succes.",
-      })
-    } catch {
-      toast({
-        title: "Erreur",
-        description: "Impossible de supprimer le domaine.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsDeleteOpen(false)
-      setDeletingId(null)
+    setIsSaving(false);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingId) return;
+
+    const result = await deleteDomainAction(deletingId);
+
+    if (result.success) {
+      toast.success("Le domaine a été supprimé avec succès.");
+      await loadDomains();
+    } else {
+      toast.error("Impossible de supprimer le domaine.");
     }
-  }
+
+    setIsDeleteOpen(false);
+    setDeletingId(null);
+  };
 
   if (isLoading) {
     return (
-      <AdminShell title="Domaines" description="Gerez vos categories de photographie">
+      <AdminShell
+        title="Domaines"
+        description="Gérez vos catégories de photographie"
+      >
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       </AdminShell>
-    )
+    );
   }
 
   return (
     <AdminShell
       title="Domaines"
-      description="Gerez vos categories de photographie"
+      description="Gérez vos catégories de photographie"
       actions={
         <Button onClick={() => handleOpenDialog()}>
           <Plus className="mr-2 h-4 w-4" />
@@ -161,15 +178,15 @@ export default function AdminCategoriesPage() {
         </Button>
       }
     >
-      {/* Categories grid */}
+      {/* Grille de cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {categories.map((category) => (
-          <Card key={category.id} className="group overflow-hidden">
-            <div className="relative aspect-[4/3]">
-              {category.image ? (
+        {domains.map((domain) => (
+          <Card key={domain.id} className="group overflow-hidden">
+            <div className="relative aspect-4/3">
+              {domain.image ? (
                 <Image
-                  src={category.image}
-                  alt={category.label}
+                  src={domain.image}
+                  alt={domain.name}
                   fill
                   className="object-cover transition-transform group-hover:scale-105"
                 />
@@ -178,20 +195,26 @@ export default function AdminCategoriesPage() {
                   <ImageIcon className="h-12 w-12 text-muted-foreground" />
                 </div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-4">
-                <h3 className="font-serif text-lg font-semibold text-white">{category.label}</h3>
-                <p className="text-sm text-white/80 line-clamp-1">{category.description}</p>
+                <h3 className="font-serif text-lg font-semibold text-white">
+                  {domain.name}
+                </h3>
+                <p className="line-clamp-1 text-sm text-white/80">
+                  {domain.description}
+                </p>
               </div>
             </div>
             <CardContent className="flex items-center justify-between p-3">
-              <span className="text-xs text-muted-foreground font-mono">{category.value}</span>
+              <span className="font-mono text-xs text-muted-foreground">
+                {domain.slug}
+              </span>
               <div className="flex gap-1">
                 <Button
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8"
-                  onClick={() => handleOpenDialog(category)}
+                  onClick={() => handleOpenDialog(domain)}
                 >
                   <Pencil className="h-4 w-4" />
                 </Button>
@@ -200,8 +223,8 @@ export default function AdminCategoriesPage() {
                   size="icon"
                   className="h-8 w-8 text-destructive hover:text-destructive"
                   onClick={() => {
-                    setDeletingId(category.id)
-                    setIsDeleteOpen(true)
+                    setDeletingId(domain.id);
+                    setIsDeleteOpen(true);
                   }}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -211,12 +234,12 @@ export default function AdminCategoriesPage() {
           </Card>
         ))}
 
-        {categories.length === 0 && (
+        {domains.length === 0 && (
           <Card className="col-span-full">
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <ImageIcon className="h-12 w-12 text-muted-foreground mb-4" />
+              <ImageIcon className="mb-4 h-12 w-12 text-muted-foreground" />
               <h3 className="font-medium">Aucun domaine</h3>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Commencez par ajouter un domaine de photographie
               </p>
               <Button className="mt-4" onClick={() => handleOpenDialog()}>
@@ -228,15 +251,18 @@ export default function AdminCategoriesPage() {
         )}
       </div>
 
-      {/* Edit/Create Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={(open) => !open && handleCloseDialog()}>
+      {/* Dialog création / édition */}
+      <Dialog
+        open={isDialogOpen}
+        onOpenChange={(open) => !open && handleCloseDialog()}
+      >
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingCategory ? "Modifier le domaine" : "Nouveau domaine"}
+              {editingDomain ? "Modifier le domaine" : "Nouveau domaine"}
             </DialogTitle>
             <DialogDescription>
-              {editingCategory
+              {editingDomain
                 ? "Modifiez les informations du domaine"
                 : "Ajoutez un nouveau domaine de photographie"}
             </DialogDescription>
@@ -245,24 +271,26 @@ export default function AdminCategoriesPage() {
           <div className="space-y-4 py-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="label">Nom du domaine *</Label>
+                <Label htmlFor="name">Nom du domaine *</Label>
                 <Input
-                  id="label"
-                  value={formData.label}
-                  onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => handleNameChange(e.target.value)}
                   placeholder="Mariage"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="value">Identifiant (slug)</Label>
+                <Label htmlFor="slug">Identifiant (slug)</Label>
                 <Input
-                  id="value"
-                  value={formData.value}
-                  onChange={(e) => setFormData({ ...formData, value: e.target.value })}
+                  id="slug"
+                  value={formData.slug}
+                  onChange={(e) =>
+                    setFormData({ ...formData, slug: e.target.value })
+                  }
                   placeholder="mariage"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Laissez vide pour generer automatiquement
+                  Laissez vide pour générer automatiquement
                 </p>
               </div>
             </div>
@@ -272,7 +300,9 @@ export default function AdminCategoriesPage() {
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 placeholder="Immortalisez le plus beau jour de votre vie"
                 rows={3}
               />
@@ -283,7 +313,7 @@ export default function AdminCategoriesPage() {
               value={formData.image}
               onChange={(value) => setFormData({ ...formData, image: value })}
               aspectRatio="video"
-              description="Format recommande: 800x600px"
+              description="Format recommandé : 800x600px"
             />
           </div>
 
@@ -291,20 +321,30 @@ export default function AdminCategoriesPage() {
             <Button variant="outline" onClick={handleCloseDialog}>
               Annuler
             </Button>
-            <Button onClick={handleSave}>
-              {editingCategory ? "Enregistrer" : "Ajouter"}
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Enregistrement...
+                </>
+              ) : editingDomain ? (
+                "Enregistrer"
+              ) : (
+                "Ajouter"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete confirmation */}
+      {/* Confirmation suppression */}
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Supprimer ce domaine ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action est irreversible. Le domaine sera definitivement supprime.
+              Cette action est irréversible. Le domaine sera définitivement
+              supprimé.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -319,5 +359,5 @@ export default function AdminCategoriesPage() {
         </AlertDialogContent>
       </AlertDialog>
     </AdminShell>
-  )
+  );
 }

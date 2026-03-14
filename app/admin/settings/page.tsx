@@ -1,62 +1,104 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { AdminShell } from "@/components/admin/admin-shell"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Separator } from "@/components/ui/separator"
-import { getSettings, setSettings, type SiteSettings } from "@/lib/admin-store"
-import { Save, Loader2, Globe, Mail, Phone, MapPin, Instagram, Facebook, Linkedin, Twitter } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { useEffect, useState } from "react";
+import { AdminShell } from "@/components/admin/admin-shell";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Save,
+  Loader2,
+  Globe,
+  Mail,
+  Phone,
+  MapPin,
+  Instagram,
+  Facebook,
+  Linkedin,
+  Twitter,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import {
+  getSettingsAction,
+  SiteSettings,
+  updateSettingsAction,
+} from "@/actions/settings.actions";
+import { toast } from "sonner";
+
+const defaultSettings: SiteSettings = {
+  siteName: "",
+  siteDescription: "",
+  contactEmail: "",
+  contactPhone: "",
+  address: "",
+  socialLinks: {
+    instagram: "",
+    facebook: "",
+    twitter: "",
+    linkedin: "",
+  },
+};
 
 export default function AdminSettingsPage() {
-  const [settings, setSettingsState] = useState<SiteSettings | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
-  const { toast } = useToast()
+  const [settings, setSettingsState] = useState<SiteSettings>(defaultSettings);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    setSettingsState(getSettings())
-    setIsLoading(false)
-  }, [])
+    async function load() {
+      try {
+        const data = await getSettingsAction();
+        setSettingsState(data);
+      } catch {
+        toast.error("Impossible de charger les paramètres");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    load();
+  }, [toast]);
 
   const handleSave = async () => {
-    if (!settings) return
-    setIsSaving(true)
-    try {
-      setSettings(settings)
-      toast({
-        title: "Parametres enregistres",
-        description: "Les parametres du site ont ete mis a jour.",
-      })
-    } catch {
-      toast({
-        title: "Erreur",
-        description: "Impossible d'enregistrer les parametres.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsSaving(false)
-    }
-  }
+    if (!settings) return;
+    setIsSaving(true);
 
-  if (isLoading || !settings) {
+    // const result = await updateSettingsAction(settings);
+
+    try {
+      const result = await updateSettingsAction(settings);
+      toast.success("Les paramètres du site ont été mis à jour.");
+    }catch {
+      toast.error("Impossible d'enregistrer les paramètres.")
+    }
+
+    setIsSaving(false);
+  };
+
+  if (isLoading) {
     return (
-      <AdminShell title="Parametres" description="Configurez les informations generales du site">
+      <AdminShell
+        title="Paramètres"
+        description="Configurez les informations générales du site"
+      >
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       </AdminShell>
-    )
+    );
   }
 
   return (
     <AdminShell
-      title="Parametres"
-      description="Configurez les informations generales du site"
+      title="Paramètres"
+      description="Configurez les informations générales du site"
       actions={
         <Button onClick={handleSave} disabled={isSaving}>
           {isSaving ? (
@@ -74,12 +116,12 @@ export default function AdminSettingsPage() {
       }
     >
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* General settings */}
+        {/* Informations générales */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Globe className="h-5 w-5" />
-              Informations generales
+              Informations générales
             </CardTitle>
             <CardDescription>
               Les informations de base de votre site
@@ -91,37 +133,42 @@ export default function AdminSettingsPage() {
               <Input
                 id="siteName"
                 value={settings.siteName}
-                onChange={(e) => setSettingsState({ ...settings, siteName: e.target.value })}
+                onChange={(e) =>
+                  setSettingsState({ ...settings, siteName: e.target.value })
+                }
                 placeholder="Alexandre Dubois Photographie"
               />
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="siteDescription">Description (SEO)</Label>
               <Textarea
                 id="siteDescription"
                 value={settings.siteDescription}
-                onChange={(e) => setSettingsState({ ...settings, siteDescription: e.target.value })}
+                onChange={(e) =>
+                  setSettingsState({
+                    ...settings,
+                    siteDescription: e.target.value,
+                  })
+                }
                 placeholder="Description pour les moteurs de recherche..."
                 rows={3}
               />
               <p className="text-xs text-muted-foreground">
-                Cette description apparait dans les resultats de recherche Google.
+                Cette description apparaît dans les résultats de recherche
+                Google.
               </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Contact settings */}
+        {/* Coordonnées */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Mail className="h-5 w-5" />
-              Coordonnees
+              Coordonnées
             </CardTitle>
-            <CardDescription>
-              Vos informations de contact
-            </CardDescription>
+            <CardDescription>Vos informations de contact</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -133,24 +180,32 @@ export default function AdminSettingsPage() {
                 id="contactEmail"
                 type="email"
                 value={settings.contactEmail}
-                onChange={(e) => setSettingsState({ ...settings, contactEmail: e.target.value })}
+                onChange={(e) =>
+                  setSettingsState({
+                    ...settings,
+                    contactEmail: e.target.value,
+                  })
+                }
                 placeholder="contact@exemple.fr"
               />
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="contactPhone" className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-muted-foreground" />
-                Telephone
+                Téléphone
               </Label>
               <Input
                 id="contactPhone"
                 value={settings.contactPhone}
-                onChange={(e) => setSettingsState({ ...settings, contactPhone: e.target.value })}
+                onChange={(e) =>
+                  setSettingsState({
+                    ...settings,
+                    contactPhone: e.target.value,
+                  })
+                }
                 placeholder="+33 6 12 34 56 78"
               />
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="address" className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -159,7 +214,9 @@ export default function AdminSettingsPage() {
               <Textarea
                 id="address"
                 value={settings.address}
-                onChange={(e) => setSettingsState({ ...settings, address: e.target.value })}
+                onChange={(e) =>
+                  setSettingsState({ ...settings, address: e.target.value })
+                }
                 placeholder="12 Rue de la Roquette, 75011 Paris"
                 rows={2}
               />
@@ -167,12 +224,12 @@ export default function AdminSettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Social links */}
+        {/* Réseaux sociaux */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Reseaux sociaux</CardTitle>
+            <CardTitle>Réseaux sociaux</CardTitle>
             <CardDescription>
-              Liens vers vos profils sur les reseaux sociaux
+              Liens vers vos profils sur les réseaux sociaux
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -184,17 +241,19 @@ export default function AdminSettingsPage() {
                 </Label>
                 <Input
                   id="instagram"
-                  value={settings.socialLinks.instagram || ""}
+                  value={settings.socialLinks.instagram}
                   onChange={(e) =>
                     setSettingsState({
                       ...settings,
-                      socialLinks: { ...settings.socialLinks, instagram: e.target.value },
+                      socialLinks: {
+                        ...settings.socialLinks,
+                        instagram: e.target.value,
+                      },
                     })
                   }
                   placeholder="https://instagram.com/..."
                 />
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="facebook" className="flex items-center gap-2">
                   <Facebook className="h-4 w-4 text-muted-foreground" />
@@ -202,17 +261,19 @@ export default function AdminSettingsPage() {
                 </Label>
                 <Input
                   id="facebook"
-                  value={settings.socialLinks.facebook || ""}
+                  value={settings.socialLinks.facebook}
                   onChange={(e) =>
                     setSettingsState({
                       ...settings,
-                      socialLinks: { ...settings.socialLinks, facebook: e.target.value },
+                      socialLinks: {
+                        ...settings.socialLinks,
+                        facebook: e.target.value,
+                      },
                     })
                   }
                   placeholder="https://facebook.com/..."
                 />
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="twitter" className="flex items-center gap-2">
                   <Twitter className="h-4 w-4 text-muted-foreground" />
@@ -220,17 +281,19 @@ export default function AdminSettingsPage() {
                 </Label>
                 <Input
                   id="twitter"
-                  value={settings.socialLinks.twitter || ""}
+                  value={settings.socialLinks.twitter}
                   onChange={(e) =>
                     setSettingsState({
                       ...settings,
-                      socialLinks: { ...settings.socialLinks, twitter: e.target.value },
+                      socialLinks: {
+                        ...settings.socialLinks,
+                        twitter: e.target.value,
+                      },
                     })
                   }
                   placeholder="https://twitter.com/..."
                 />
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="linkedin" className="flex items-center gap-2">
                   <Linkedin className="h-4 w-4 text-muted-foreground" />
@@ -238,11 +301,14 @@ export default function AdminSettingsPage() {
                 </Label>
                 <Input
                   id="linkedin"
-                  value={settings.socialLinks.linkedin || ""}
+                  value={settings.socialLinks.linkedin}
                   onChange={(e) =>
                     setSettingsState({
                       ...settings,
-                      socialLinks: { ...settings.socialLinks, linkedin: e.target.value },
+                      socialLinks: {
+                        ...settings.socialLinks,
+                        linkedin: e.target.value,
+                      },
                     })
                   }
                   placeholder="https://linkedin.com/in/..."
@@ -252,18 +318,19 @@ export default function AdminSettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Info card */}
+        {/* Note informative */}
         <Card className="lg:col-span-2 bg-muted/50">
           <CardContent className="p-6">
-            <h3 className="font-semibold mb-2">A propos des parametres</h3>
+            <h3 className="font-semibold mb-2">À propos des paramètres</h3>
             <p className="text-sm text-muted-foreground">
-              Ces parametres sont utilises dans plusieurs endroits du site : le pied de page,
-              la page de contact, les meta-donnees SEO et les liens vers vos reseaux sociaux.
-              Assurez-vous de les maintenir a jour pour une meilleure visibilite.
+              Ces paramètres sont utilisés dans plusieurs endroits du site : le
+              pied de page, la page de contact, les méta-données SEO et les
+              liens vers vos réseaux sociaux. Assurez-vous de les maintenir à
+              jour pour une meilleure visibilité.
             </p>
           </CardContent>
         </Card>
       </div>
     </AdminShell>
-  )
+  );
 }

@@ -53,12 +53,12 @@ const navigation = [
     badge: "appointments",
   },
   { name: "Disponibilites", href: "/admin/availability", icon: Calendar },
-  {
-    name: "Notifications",
-    href: "/admin/notifications",
-    icon: Bell,
-    badge: "notifications",
-  },
+  // {
+  //   name: "Notifications",
+  //   href: "/admin/notifications",
+  //   icon: Bell,
+  //   badge: "notifications",
+  // },
   { name: "Section Hero", href: "/admin/hero", icon: Image },
   { name: "Domaines", href: "/admin/categories", icon: FolderOpen },
   { name: "Portfolio", href: "/admin/portfolio", icon: Camera },

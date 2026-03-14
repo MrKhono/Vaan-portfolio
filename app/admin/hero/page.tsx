@@ -1,70 +1,91 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { AdminShell } from "@/components/admin/admin-shell"
-import { ImageUpload } from "@/components/admin/image-upload"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { getHero, setHero, type HeroContent } from "@/lib/admin-store"
-import { Save, Loader2, Eye } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import Image from "next/image"
-import Link from "next/link"
+import { useEffect, useState } from "react";
+import { AdminShell } from "@/components/admin/admin-shell";
+import { ImageUpload } from "@/components/admin/image-upload";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Save, Loader2, Eye } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  getHeroAction,
+  HeroContent,
+  updateHeroAction,
+} from "@/actions/hero.actions";
+import { toast } from "sonner";
+
+const defaultHero: HeroContent = {
+  title: "",
+  subtitle: "",
+  image: "",
+};
 
 export default function AdminHeroPage() {
-  const [hero, setHeroState] = useState<HeroContent | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
-  const { toast } = useToast()
+  const [hero, setHeroState] = useState<HeroContent>(defaultHero);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    setHeroState(getHero())
-    setIsLoading(false)
-  }, [])
+    async function loadHero() {
+      try {
+        const data = await getHeroAction();
+        setHeroState(data);
+      } catch {
+        toast.error("Impossible de charger les données du Hero.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadHero();
+  }, [toast]);
 
   const handleSave = async () => {
-    if (!hero) return
-    setIsSaving(true)
-    try {
-      setHero(hero)
-      toast({
-        title: "Modifications enregistrees",
-        description: "La section Hero a ete mise a jour avec succes.",
-      })
-    } catch {
-      toast({
-        title: "Erreur",
-        description: "Impossible d'enregistrer les modifications.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsSaving(false)
-    }
-  }
+    setIsSaving(true);
 
-  if (isLoading || !hero) {
+    const result = await updateHeroAction(hero);
+
+    if (result.success) {
+      toast.success("Modifications enregistrées");
+    } else {
+      toast.error("Impossible d'enregistrer les modifications.");
+    }
+
+    setIsSaving(false);
+  };
+
+  if (isLoading) {
     return (
-      <AdminShell title="Section Hero" description="Gerez l'image et les textes de la section d'accueil">
+      <AdminShell
+        title="Section Hero"
+        description="Gérez l'image et les textes de la section d'accueil"
+      >
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       </AdminShell>
-    )
+    );
   }
 
   return (
     <AdminShell
       title="Section Hero"
-      description="Gerez l'image et les textes de la section d'accueil"
+      description="Gérez l'image et les textes de la section d'accueil"
       actions={
         <div className="flex gap-2">
           <Button variant="outline" asChild>
             <Link href="/" target="_blank">
               <Eye className="mr-2 h-4 w-4" />
-              Apercu
+              Aperçu
             </Link>
           </Button>
           <Button onClick={handleSave} disabled={isSaving}>
@@ -88,7 +109,9 @@ export default function AdminHeroPage() {
         <Card>
           <CardHeader>
             <CardTitle>Contenu</CardTitle>
-            <CardDescription>Modifiez les textes et le bouton d&apos;appel a l&apos;action</CardDescription>
+            <CardDescription>
+              Modifiez les textes et le bouton d&apos;appel à l&apos;action
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -96,7 +119,9 @@ export default function AdminHeroPage() {
               <Input
                 id="title"
                 value={hero.title}
-                onChange={(e) => setHeroState({ ...hero, title: e.target.value })}
+                onChange={(e) =>
+                  setHeroState({ ...hero, title: e.target.value })
+                }
                 placeholder="Votre nom ou titre"
               />
             </div>
@@ -106,8 +131,10 @@ export default function AdminHeroPage() {
               <Textarea
                 id="subtitle"
                 value={hero.subtitle}
-                onChange={(e) => setHeroState({ ...hero, subtitle: e.target.value })}
-                placeholder="Description de votre activite"
+                onChange={(e) =>
+                  setHeroState({ ...hero, subtitle: e.target.value })
+                }
+                placeholder="Description de votre activité"
                 rows={4}
               />
             </div>
@@ -117,15 +144,17 @@ export default function AdminHeroPage() {
         {/* Image */}
         <Card>
           <CardHeader>
-            <CardTitle>Image d&apos;arriere-plan</CardTitle>
-            <CardDescription>L&apos;image qui s&apos;affiche en fond de la section Hero</CardDescription>
+            <CardTitle>Image d&apos;arrière-plan</CardTitle>
+            <CardDescription>
+              L&apos;image qui s&apos;affiche en fond de la section Hero
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <ImageUpload
               value={hero.image}
               onChange={(value) => setHeroState({ ...hero, image: value })}
               aspectRatio="video"
-              description="Format recommande: 1920x1080px ou plus grand"
+              description="Format recommandé : 1920x1080px ou plus grand"
             />
           </CardContent>
         </Card>
@@ -134,11 +163,13 @@ export default function AdminHeroPage() {
       {/* Preview */}
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle>Apercu en direct</CardTitle>
-          <CardDescription>Visualisez vos modifications en temps reel</CardDescription>
+          <CardTitle>Aperçu en direct</CardTitle>
+          <CardDescription>
+            Visualisez vos modifications en temps réel
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="relative aspect-[21/9] overflow-hidden rounded-lg bg-foreground">
+          <div className="relative aspect-21/9 overflow-hidden rounded-lg bg-foreground">
             {hero.image && (
               <Image
                 src={hero.image}
@@ -154,13 +185,10 @@ export default function AdminHeroPage() {
               <p className="mt-4 max-w-2xl text-sm opacity-90 sm:text-base">
                 {hero.subtitle || "Votre description"}
               </p>
-              <Button className="mt-6" variant="secondary" size="sm">
-                {hero.ctaText || "Bouton"}
-              </Button>
             </div>
           </div>
         </CardContent>
       </Card>
     </AdminShell>
-  )
+  );
 }

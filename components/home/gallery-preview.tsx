@@ -27,7 +27,7 @@ export function GalleryPreview() {
                 className="group relative block overflow-hidden rounded-xl"
               >
                 <div
-                  className={i % 3 === 0 ? "aspect-[3/4]" : i % 3 === 1 ? "aspect-square" : "aspect-[4/3]"}
+                  className={i % 3 === 0 ? "aspect-3/4" : i % 3 === 1 ? "aspect-square" : "aspect-4/3"}
                 >
                   <img
                     src={project.coverImage}
@@ -35,7 +35,7 @@ export function GalleryPreview() {
                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                 </div>
-                <div className="absolute inset-0 flex items-end bg-gradient-to-t from-[#0F0F0F]/70 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+                <div className="absolute inset-0 flex items-end bg-linear-to-t from-[#0F0F0F]/70 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100">
                   <div className="p-6">
                     <p className="text-xs font-medium uppercase tracking-wider text-[#D6C6B8]">
                       {project.category}

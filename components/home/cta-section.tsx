@@ -27,7 +27,7 @@ export function CtaSection() {
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
-              href="/contact"
+              href="/rendez-vous"
               className="inline-flex items-center gap-2 rounded-lg bg-[#F8F8F8] px-8 py-3.5 text-sm font-medium uppercase tracking-wider text-[#0F0F0F] transition-all duration-300 hover:bg-[#D6C6B8]"
             >
               Prendre rendez-vous

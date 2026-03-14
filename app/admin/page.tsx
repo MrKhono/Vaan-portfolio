@@ -263,38 +263,7 @@ export default function AdminDashboardPage() {
         </Card>
       </div>
 
-      {/* Recent activity placeholder */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <TrendingUp className="h-5 w-5" />
-            Apercu du contenu
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-lg border border-border p-4">
-              <p className="text-sm font-medium text-muted-foreground">
-                Dernier projet
-              </p>
-              <p className="mt-1 font-medium">
-                {getProjects()[0]?.title || "Aucun projet"}
-              </p>
-            </div>
-            <div className="rounded-lg border border-border p-4">
-              <p className="text-sm font-medium text-muted-foreground">
-                Dernier article
-              </p>
-            </div>
-            <div className="rounded-lg border border-border p-4">
-              <p className="text-sm font-medium text-muted-foreground">
-                Services actifs
-              </p>
-              <p className="mt-1 font-medium">{stats.services} services</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+     
     </AdminShell>
   );
 }

@@ -1,16 +1,20 @@
-'use client';
+'use client'
 
-import { ReactNode } from "react";
-import { usePathname } from 'next/navigation';
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
+import { ReactNode } from "react"
+import { usePathname } from 'next/navigation'
 
 interface ConditionalLayoutProps {
-  children: ReactNode;
+  children: ReactNode
+  navbar: ReactNode
+  footer: ReactNode
 }
 
-export default function ConditionalLayout({ children }: ConditionalLayoutProps) {
-  const pathname = usePathname();
+export default function ConditionalLayout({
+  children,
+  navbar,
+  footer,
+}: ConditionalLayoutProps) {
+  const pathname = usePathname()
 
   const noLayoutPages = [
     "/admin",
@@ -30,19 +34,19 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
     "/admin/testimonials",
     "/admin/about",
     "/admin/admins",
-  ];
+  ]
 
-  const hideLayout = noLayoutPages.includes(pathname);
+  const hideLayout = noLayoutPages.includes(pathname)
 
   if (hideLayout) {
-    return <>{children}</>;
+    return <>{children}</>
   }
 
   return (
     <div>
-      <Navbar />
+      {navbar}
       {children}
-      <Footer />
+      {footer}
     </div>
-  );
+  )
 }
