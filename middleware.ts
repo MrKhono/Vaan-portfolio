@@ -1,58 +1,25 @@
-// import { NextRequest, NextResponse } from "next/server";
-// import { getSessionCookie } from "better-auth/cookies";
-
-// const protectedRoutes = ["/admin/profile", "/admin"];
-
-// export async function proxy(req: NextRequest) {
-//   const { nextUrl } = req;
-//   const sessionCookie = getSessionCookie(req);
-
-//   const res = NextResponse.next();
-
-//   const isLoggedIn = !!sessionCookie;
-//   const isOnProtectedRoute = protectedRoutes.includes(nextUrl.pathname);
-//   const isOnAuthRoute = nextUrl.pathname.startsWith("/admin/login");
-
-//   if (isOnProtectedRoute && !isLoggedIn) {
-//     return NextResponse.redirect(new URL("/admin/login", req.url));
-//   }
-
-//   if (isOnAuthRoute && isLoggedIn) {
-//     return NextResponse.redirect(new URL("/admin", req.url));
-//   }
-
-//   return res;
-// }
-
-// export const config = {
-//   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
-// };
-
-
+// middleware.ts
 import { NextRequest, NextResponse } from "next/server"
 import { getSessionCookie } from "better-auth/cookies"
 
 const authPath = "/admin/login"
 
-export async function proxy(req: NextRequest) {
+export async function middleware(req: NextRequest) {  // ← "proxy" → "middleware"
   const { nextUrl } = req
   const sessionCookie = getSessionCookie(req)
 
   const isOnAuthRoute      = nextUrl.pathname.startsWith(authPath)
   const isOnProtectedRoute = nextUrl.pathname.startsWith("/admin") && !isOnAuthRoute
 
-  // Pas de cookie → redirection immédiate sans appel réseau
   if (isOnProtectedRoute && !sessionCookie) {
     return NextResponse.redirect(new URL(authPath, req.url))
   }
 
-  // Cookie présent → vérifier la validité réelle de la session
   if (isOnProtectedRoute && sessionCookie) {
     try {
       const response = await fetch(new URL("/api/auth/get-session", req.url), {
         headers: { cookie: req.headers.get("cookie") ?? "" },
       })
-
       const session = await response.json()
 
       if (!session?.user) {
@@ -65,7 +32,6 @@ export async function proxy(req: NextRequest) {
     }
   }
 
-  // Déjà connecté → rediriger vers le dashboard
   if (isOnAuthRoute && sessionCookie) {
     try {
       const response = await fetch(new URL("/api/auth/get-session", req.url), {
@@ -76,9 +42,7 @@ export async function proxy(req: NextRequest) {
       if (session?.user) {
         return NextResponse.redirect(new URL("/admin", req.url))
       }
-    } catch {
-      // Session invalide → laisser passer vers login
-    }
+    } catch {}
   }
 
   return NextResponse.next()
