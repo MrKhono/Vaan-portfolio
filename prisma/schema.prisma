@@ -256,3 +256,33 @@ model Partner {
 
   @@map("partners")
 }
+
+model Availability {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  date      String   @unique // "2025-06-15"
+  slots     Json     // [{ start: "09:00", end: "10:00" }]
+
+  @@map("availabilities")
+}
+
+model Appointment {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  clientName  String
+  clientEmail String
+  clientPhone String
+  serviceType String
+  message     String?
+  date        String   // "2025-06-15"
+  slotStart   String   // "09:00"
+  slotEnd     String   // "10:00"
+  status      String   @default("pending") // pending | confirmed | rejected | cancelled
+  adminNotes  String?
+
+  @@map("appointments")
+}

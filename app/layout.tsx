@@ -15,25 +15,20 @@ const playfair = Playfair_Display({
   variable: "--font-playfair",
 })
 
-// generateMetadata remplace export const metadata
-// Elle peut être async et lire la base de données
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettingsAction()
 
   return {
     title: {
-      default: settings.siteName || "Vaan Photographie | Photographe Professionnel",
-      template: `%s | ${settings.siteName || "Ouedrdraogo Photographie"}`,
+      default:  settings.siteName || "Vaan Photographie | Photographe Professionnel",
+      template: `%s | ${settings.siteName || "Ouedraogo Photographie"}`,
     },
     description: settings.siteDescription || "Photographe professionnel spécialisé en mariage, portrait, mode et événementiel.",
     keywords: ["photographe", "mariage", "portrait", "mode", "événementiel", "professionnel"],
     icons: {
-      icon: [
-        { url: "/icon-light-32x32.png", media: "(prefers-color-scheme: light)" },
-        { url: "/icon-dark-32x32.png", media: "(prefers-color-scheme: dark)" },
-        { url: "/icon.svg", type: "image/svg+xml" },
-      ],
-      apple: "/apple-icon.png",
+      icon:     [{ url: "/sno.png", type: "image/png" }],
+      apple:    [{ url: "/sno.png", sizes: "180x180", type: "image/png" }],
+      shortcut:  "/sno.png",
     },
   }
 }
@@ -41,9 +36,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#F8F8F8" },
-    { media: "(prefers-color-scheme: dark)", color: "#0F0F0F" },
+    { media: "(prefers-color-scheme: dark)",  color: "#0F0F0F" },
   ],
-  width: "device-width",
+  width:        "device-width",
   initialScale: 1,
 }
 
@@ -56,6 +51,10 @@ export default async function RootLayout({
 
   return (
     <html lang="fr" suppressHydrationWarning>
+      <head>
+        <link rel="icon"             href="/sno.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/sno.png" />
+      </head>
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"

@@ -1,100 +1,81 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react"
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, Save, Loader2, Eye, EyeOff, User } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { updateAdmin, getCurrentUser, type Admin } from "@/lib/admin-store";
+  Card, CardContent, CardHeader,
+  CardTitle, CardDescription,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Camera, Save, Loader2, User } from "lucide-react"
+import { toast } from "sonner"
+import { updateProfileAction } from "@/actions/user.actions"
 
 interface EditProfileFormProps {
-  user: Admin;
+  user: {
+    name:  string
+    email: string
+    image: string | null
+  }
 }
 
 export default function EditProfileForm({ user }: EditProfileFormProps) {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    avatar: "",
-    avatarFile: null as File | null,
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
-  const [isSaving, setIsSaving] = useState(false);
-  const [showPasswords, setShowPasswords] = useState(false);
-  const { toast } = useToast();
+    name:  user.name,
+    email: user.email,
+    image: user.image ?? "",
+  })
+  const [isSaving, setIsSaving]     = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        name: user.name,
-        email: user.email,
-        avatar: user.avatar || "",
-        avatarFile: null,
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
-    }
-  }, [user]);
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
 
-  const handleSaveProfile = async () => {
-    if (!user) return;
+    setIsUploading(true)
 
-    if (!formData.name.trim() || !formData.email.trim()) {
-      toast({
-        title: "Erreur",
-        description: "Le nom et l'email sont requis.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsSaving(true);
     try {
-      updateAdmin(user.id, {
-        name: formData.name,
-        email: formData.email,
-        avatar: formData.avatar,
-      });
+      const form = new FormData()
+      form.append("files", file)
 
-      const updatedUser = getCurrentUser();
-      if (updatedUser) {
-        localStorage.setItem(
-          "admin_current_user",
-          JSON.stringify({
-            ...updatedUser,
-            name: formData.name,
-            email: formData.email,
-            avatar: formData.avatar,
-          }),
-        );
+      const res  = await fetch("/api/upload", { method: "POST", body: form })
+      const data = await res.json()
+
+      if (data.urls?.[0]) {
+        setFormData((prev) => ({ ...prev, image: data.urls[0] }))
       }
-
-      toast({
-        title: "Profil mis à jour",
-        description: "Vos informations ont été enregistrées.",
-      });
     } catch {
-      toast({
-        title: "Erreur",
-        description: "Impossible de mettre à jour le profil.",
-        variant: "destructive",
-      });
+      toast.error("Impossible d'uploader l'image.")
     } finally {
-      setIsSaving(false);
+      setIsUploading(false)
     }
-  };
+  }
+
+  async function handleSave() {
+    if (!formData.name.trim() || !formData.email.trim()) {
+      toast.error("Le nom et l'email sont requis.")
+      return
+    }
+
+    setIsSaving(true)
+
+    const result = await updateProfileAction({
+      name:  formData.name,
+      email: formData.email,
+      image: formData.image || undefined,
+    })
+
+    if (result.success) {
+      toast.success("Profil mis à jour avec succès.")
+    } else {
+      toast.error(result.error ?? "Impossible de mettre à jour le profil.")
+    }
+
+    setIsSaving(false)
+  }
 
   return (
     <Card className="lg:col-span-2">
@@ -113,9 +94,7 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Votre nom"
             />
           </div>
@@ -125,58 +104,48 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
               id="email"
               type="email"
               value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               placeholder="votre@email.fr"
             />
           </div>
         </div>
 
+        {/* Photo de profil */}
         <div className="space-y-2">
           <Label htmlFor="avatar">Photo de profil</Label>
-
-          <div className="flex gap-3 items-center">
+          <div className="flex items-center gap-3">
             <Input
+              ref={inputRef}
               type="file"
               id="avatar"
               accept="image/*"
               className="flex-1"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  const preview = URL.createObjectURL(file);
-                  setFormData({
-                    ...formData,
-                    avatar: preview,
-                    avatarFile: file,
-                  });
-                }
-              }}
+              disabled={isUploading}
+              onChange={handleFileChange}
             />
-
-            {formData.avatar && (
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={formData.avatar} />
+            {isUploading ? (
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            ) : formData.image ? (
+              <Avatar className="h-10 w-10 shrink-0">
+                <AvatarImage src={formData.image} />
                 <AvatarFallback>
                   <Camera className="h-4 w-4" />
                 </AvatarFallback>
               </Avatar>
-            )}
+            ) : null}
           </div>
         </div>
 
         <div className="flex justify-end pt-2">
-          <Button onClick={handleSaveProfile} disabled={isSaving}>
+          <Button onClick={handleSave} disabled={isSaving || isUploading}>
             {isSaving ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Enregistrement...</>
             ) : (
-              <Save className="mr-2 h-4 w-4" />
+              <><Save className="mr-2 h-4 w-4" />Enregistrer</>
             )}
-            Enregistrer
           </Button>
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }

@@ -5,12 +5,12 @@ import { useSearchParams } from "next/navigation"
 import { AdminShell } from "@/components/admin/admin-shell"
 import { Button } from "@/components/ui/button"
 import { Plus, Loader2 } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
 import { createProjectAction, deleteProjectAction, getProjectsAction, Project, ProjectData, updateProjectAction } from "@/actions/project.actions"
 import { Domain, getDomainsAction } from "@/actions/domain.actions"
 import { ProjectDeleteDialog } from "./project-delete-dialog"
 import { ProjectDialog } from "./project-dialog"
 import { ProjectsTable } from "./projects-table"
+import { toast } from "sonner";
 
 
 export const emptyProject: ProjectData = {
@@ -36,7 +36,7 @@ function ProjectsContent() {
   const [editingProject, setEditingProject] = useState<Project | null>(null)
   const [deletingId, setDeletingId]         = useState<string | null>(null)
   const [isSaving, setIsSaving]             = useState(false)
-  const { toast } = useToast()
+  
 
   async function loadData() {
     try {
@@ -44,7 +44,7 @@ function ProjectsContent() {
       setProjects(p)
       setDomains(d)
     } catch {
-      toast({ title: "Erreur", description: "Impossible de charger les données.", variant: "destructive" })
+      toast.error("Impossoble de charger les données");
     } finally {
       setIsLoading(false)
     }
@@ -71,7 +71,7 @@ function ProjectsContent() {
   function handleCloseDialog() {
     setIsDialogOpen(false)
     setEditingProject(null)
-    window.history.replaceState({}, "", "/admin/projets")
+    window.history.replaceState({}, "", "/admin/projects")
   }
 
   async function handleSave(formData: ProjectData) {
@@ -82,16 +82,15 @@ function ProjectsContent() {
       : await createProjectAction(formData)
 
     if (result.success) {
-      toast({
-        title: editingProject ? "Projet modifié" : "Projet ajouté",
-        description: editingProject
-          ? "Le projet a été mis à jour avec succès."
-          : "Le nouveau projet a été créé avec succès.",
-      })
+      if (editingProject) {
+        toast.success("Le projet a été mis à jour avec succès.");
+      }else{
+        toast.success("Le nouveau projet a été créé avec succès.");
+      }
       await loadData()
       handleCloseDialog()
     } else {
-      toast({ title: "Erreur", description: result.error ?? "Impossible d'enregistrer.", variant: "destructive" })
+      toast.error("Impossible d'enregistrer")
     }
 
     setIsSaving(false)
@@ -103,10 +102,10 @@ function ProjectsContent() {
     const result = await deleteProjectAction(deletingId)
 
     if (result.success) {
-      toast({ title: "Projet supprimé", description: "Le projet a été supprimé avec succès." })
+      toast.success("Le projet a été supprimé avec succès.")
       await loadData()
     } else {
-      toast({ title: "Erreur", description: result.error, variant: "destructive" })
+      toast.error(result.error)
     }
 
     setIsDeleteOpen(false)

@@ -44,8 +44,9 @@ import {
   ExternalLink,
 } from "lucide-react";
 
-import { useToast } from "@/hooks/use-toast";
+
 import Image from "next/image";
+import { toast } from "sonner";
 
 const emptyPartner: PartnerData = {
   name: "",
@@ -66,18 +67,14 @@ export default function AdminPartnersPage() {
   const [formData, setFormData] = useState<PartnerData>(emptyPartner);
   const [isSaving, setIsSaving] = useState(false);
 
-  const { toast } = useToast();
+  
 
   async function loadPartners() {
     try {
       const data = await getPartnersAction();
       setPartners(data);
     } catch {
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les partenaires.",
-        variant: "destructive",
-      });
+      toast.error("Impossible de charger les partenaires")
     } finally {
       setIsLoading(false);
     }
@@ -117,21 +114,16 @@ export default function AdminPartnersPage() {
       : await createPartnerAction(formData);
 
     if (result.success) {
-      toast({
-        title: editingPartner ? "Partenaire modifié" : "Partenaire ajouté",
-        description: editingPartner
-          ? "Le partenaire a été mis à jour avec succès."
-          : "Le nouveau partenaire a été créé avec succès.",
-      });
+      if (editingPartner) {
+        toast.success("Le partenaire a été mis à jour avec succès")
+      }else{
+        toast.success("Le nouveau partenaire a été créé avec succès.")
+      }
 
       await loadPartners();
       handleCloseDialog();
     } else {
-      toast({
-        title: "Erreur",
-        description: result.error ?? "Impossible d'enregistrer le partenaire.",
-        variant: "destructive",
-      });
+      toast.error("Impossible de charger les parteanires")
     }
 
     setIsSaving(false);
@@ -143,18 +135,11 @@ export default function AdminPartnersPage() {
     const result = await deletePartnerAction(deletingId);
 
     if (result.success) {
-      toast({
-        title: "Partenaire supprimé",
-        description: "Le partenaire a été supprimé avec succès.",
-      });
+      toast.success("Le partenaire a été supprumé avec succès")
 
       await loadPartners();
     } else {
-      toast({
-        title: "Erreur",
-        description: result.error,
-        variant: "destructive",
-      });
+      toast.error(result.error)
     }
 
     setIsDeleteOpen(false);

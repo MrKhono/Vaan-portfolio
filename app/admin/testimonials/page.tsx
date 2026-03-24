@@ -35,7 +35,7 @@ import {
   type TestimonialData,
 } from "@/actions/testimonial.actions"
 import { Plus, Loader2, Pencil, Trash2, Quote } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner";
 
 const emptyTestimonial: TestimonialData = {
   name:    "",
@@ -53,18 +53,14 @@ function TestimonialsContent() {
   const [deletingId, setDeletingId]           = useState<string | null>(null)
   const [formData, setFormData]               = useState<TestimonialData>(emptyTestimonial)
   const [isSaving, setIsSaving]               = useState(false)
-  const { toast } = useToast()
+ 
 
   async function loadTestimonials() {
     try {
       const data = await getTestimonialsAction()
       setTestimonials(data)
     } catch {
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les témoignages.",
-        variant: "destructive",
-      })
+      toast.error("Impossible de charger les témoignages");
     } finally {
       setIsLoading(false)
     }
@@ -98,7 +94,7 @@ function TestimonialsContent() {
     setIsDialogOpen(false)
     setEditingTestimonial(null)
     setFormData(emptyTestimonial)
-    window.history.replaceState({}, "", "/admin/temoignages")
+    window.history.replaceState({}, "", "/admin/testimonials")
   }
 
   async function handleSave() {
@@ -109,22 +105,18 @@ function TestimonialsContent() {
       : await createTestimonialAction(formData)
 
     if (result.success) {
-      toast({
-        title: editingTestimonial ? "Témoignage modifié" : "Témoignage ajouté",
-        description: editingTestimonial
-          ? "Le témoignage a été mis à jour avec succès."
-          : "Le nouveau témoignage a été créé avec succès.",
-      })
+      if (result.success) {
+        if (editingTestimonial) {
+          toast.success("Le témoignage a été mis à jour avec succès.")
+        } else {
+          toast.success("Le nouveau témoignage a été créé avec succès");
+        }
+      }
       await loadTestimonials()
       handleCloseDialog()
     } else {
-      toast({
-        title: "Erreur",
-        description: result.error ?? "Impossible d'enregistrer le témoignage.",
-        variant: "destructive",
-      })
+      toast.error("Impossible d'enregistrer le témoignage");
     }
-
     setIsSaving(false)
   }
 
@@ -134,17 +126,10 @@ function TestimonialsContent() {
     const result = await deleteTestimonialAction(deletingId)
 
     if (result.success) {
-      toast({
-        title: "Témoignage supprimé",
-        description: "Le témoignage a été supprimé avec succès.",
-      })
+      toast.success("Le témoignage a été supprimé avec succès");
       await loadTestimonials()
     } else {
-      toast({
-        title: "Erreur",
-        description: result.error,
-        variant: "destructive",
-      })
+      toast.error(result.error)
     }
 
     setIsDeleteOpen(false)

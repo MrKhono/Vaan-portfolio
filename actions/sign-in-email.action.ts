@@ -5,8 +5,6 @@ import { headers } from "next/headers";
 import { APIError } from "better-auth/api";
 
 export async function signInEmailAction(formData: FormData) {
-  const name = String(formData.get("name"));
-  if (!name) return { error: "Entrez un nom" };
 
   const email = String(formData.get("email"));
   if (!email) return { error: "Entrez un email" };
@@ -21,14 +19,14 @@ export async function signInEmailAction(formData: FormData) {
         email,
         password,
       },
-      asResponse: true,
     });
 
-    return { error: null };
+     return { success: true, error: null };
   } catch (err) {
     if (err instanceof APIError) {
-      return { error: err.message };
+      // return { error: err.message };
+      return { error: "Email ou mot de passe invalide" };
     }
-    return { error: "Erruer du serveur interne" };
+   return { success: false, error: "Erreur du serveur interne" };
   }
 }

@@ -30,10 +30,10 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
+import { toast } from "sonner";
 
 
 import { Plus, Loader2, Pencil, ImageIcon, Eye, X, Upload, Link as LinkIcon } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
 import Image from "next/image"
 import Link from "next/link"
 import { getProjectsAction, Project, updateProjectAction } from "@/actions/project.actions"
@@ -52,7 +52,7 @@ export default function AdminPortfolioPage() {
   const [useUrl, setUseUrl]               = useState(false)
   const [urlInput, setUrlInput]           = useState("")
   const fileInputRef                      = useRef<HTMLInputElement>(null)
-  const { toast } = useToast()
+
 
   async function loadData() {
     try {
@@ -60,11 +60,7 @@ export default function AdminPortfolioPage() {
       setProjects(p)
       setDomains(d)
     } catch {
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les données.",
-        variant: "destructive",
-      })
+      toast.error("Impossible de charger les données");
     } finally {
       setIsLoading(false)
     }
@@ -129,17 +125,9 @@ export default function AdminPortfolioPage() {
       const updatedCover  = selectedProject.coverImage || data.urls[0]
 
       await saveImages(selectedProject, updatedImages, updatedCover)
-
-      toast({
-        title: "Images ajoutées",
-        description: `${data.urls.length} image(s) ajoutée(s) au projet.`,
-      })
+      toast.success(`${data.urls.length} image(s) ajoutée(s) au projet.`)
     } catch {
-      toast({
-        title: "Erreur",
-        description: "Impossible d'uploader les images.",
-        variant: "destructive",
-      })
+      toast.error("Impossible d'uploader les images");
     } finally {
       setIsUploading(false)
       if (fileInputRef.current) fileInputRef.current.value = ""
@@ -159,16 +147,9 @@ export default function AdminPortfolioPage() {
       setUrlInput("")
       setUseUrl(false)
 
-      toast({
-        title: "Image ajoutée",
-        description: "L'image a été ajoutée au projet.",
-      })
+      toast.success("L'image a été ajoutéz au projet");
     } catch {
-      toast({
-        title: "Erreur",
-        description: "Impossible d'ajouter l'image.",
-        variant: "destructive",
-      })
+      toast.error("Impossible d'ajouter l'image");
     }
   }
 
@@ -191,16 +172,9 @@ export default function AdminPortfolioPage() {
 
       await saveImages(selectedProject, updatedImages, updatedCover)
 
-      toast({
-        title: "Image supprimée",
-        description: "L'image a été retirée du projet.",
-      })
+      toast.success("L'image a été retiré avec succès");
     } catch {
-      toast({
-        title: "Erreur",
-        description: "Impossible de supprimer l'image.",
-        variant: "destructive",
-      })
+      toast.error("Impossible de supprimer l'image");
     } finally {
       setIsDeleteOpen(false)
       setDeletingImageIndex(null)
@@ -211,17 +185,10 @@ export default function AdminPortfolioPage() {
     if (!selectedProject || imageUrl === selectedProject.coverImage) return
 
     try {
-      await saveImages(selectedProject, selectedProject.images, imageUrl)
-      toast({
-        title: "Image de couverture modifiée",
-        description: "L'image de couverture a été mise à jour.",
-      })
+      await saveImages(selectedProject, selectedProject.images, imageUrl);
+      toast.success("L'image de couverture a été mise à jour.")
     } catch {
-      toast({
-        title: "Erreur",
-        description: "Impossible de changer la couverture.",
-        variant: "destructive",
-      })
+      toast.error("Impossible de changer la couverture.")
     }
   }
 

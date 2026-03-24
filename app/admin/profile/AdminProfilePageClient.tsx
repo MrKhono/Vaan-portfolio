@@ -1,23 +1,25 @@
-"use client"
-
-import { useAuth } from "@/components/admin/auth-context"
 import { AdminShell } from "@/components/admin/admin-shell"
-import { Loader2 } from "lucide-react"
-import ProfileCard from "./ProfileCard"
-import EditProfileForm from "./EditProfileForm"
+import { auth } from "@/lib/auth"
+import { headers } from "next/headers"
+import { redirect } from "next/navigation"
+import ProfileCard        from "./ProfileCard"
+import EditProfileForm    from "./EditProfileForm"
 import ChangePasswordForm from "./ChangePasswordForm"
 
-export default function AdminProfilePageClient({ session }: { session: any }) {
-  const { user } = useAuth() 
-  
-  if (!user) {
-    return (
-      <AdminShell title="Mon profil" description="Gérez vos informations personnelles">
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
-      </AdminShell>
-    )
+export default async function AdminProfilePage() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  })
+
+  if (!session) redirect("/admin/login")
+
+  // On normalise image : undefined → null
+  const user = {
+    id:        session.user.id,
+    name:      session.user.name,
+    email:     session.user.email,
+    image:     session.user.image ?? null,
+    createdAt: session.user.createdAt,
   }
 
   return (
@@ -25,7 +27,7 @@ export default function AdminProfilePageClient({ session }: { session: any }) {
       <div className="grid gap-6 lg:grid-cols-3">
         <ProfileCard user={user} />
         <EditProfileForm user={user} />
-        <ChangePasswordForm user={user} />
+        <ChangePasswordForm />
       </div>
     </AdminShell>
   )

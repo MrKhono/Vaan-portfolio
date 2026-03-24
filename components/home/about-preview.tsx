@@ -29,7 +29,7 @@ export async function AboutPreview() {
           <img
             src={image}
             alt={`${title}, photographe professionnel`}
-            className="aspect-4/5 w-full object-cover"
+            className="aspect-[4/5] w-full object-cover"
           />
         </FadeIn>
 
@@ -43,9 +43,9 @@ export async function AboutPreview() {
           {/* <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
             {description}
           </p> */}
-          <p
-            className="mt-6 text-lg leading-relaxed text-muted-foreground"
-            dangerouslySetInnerHTML={{ __html: description }}
+          <div
+            className="prose prose-neutral mt-6 max-w-none"
+            dangerouslySetInnerHTML={{ __html: description ?? "" }}
           />
 
           {/* Statistiques */}

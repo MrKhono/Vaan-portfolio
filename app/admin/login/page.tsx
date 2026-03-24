@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Camera, Loader2, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Loader2, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { signInEmailAction } from "@/actions/sign-in-email.action";
@@ -23,68 +23,32 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  // const { user, isLoading, login } = useAuth()
   const router = useRouter();
 
-   const [isPending, setIsPending] = useState(false);
+  const [isPending, setIsPending] = useState(false);
 
-  // useEffect(() => {
-  //   if (!isLoading && user) {
-  //     router.push("/admin")
-  //   }
-  // }, [user, isLoading, router])
+  async function handleSubmit(evt: React.FormEvent<HTMLFormElement>) {
+    evt.preventDefault();
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault()
-  //   setError("")
-  //   setIsSubmitting(true)
+    setIsPending(true);
 
-  //   try {
-  //     const success = await login(email, password)
-  //     if (success) {
-  //       router.push("/admin")
-  //     } else {
-  //       setError("Email ou mot de passe incorrect")
-  //     }
-  //   } catch {
-  //     setError("Une erreur est survenue. Veuillez reessayer.")
-  //   } finally {
-  //     setIsSubmitting(false)
-  //   }
-  // }
+    const formData = new FormData(evt.target as HTMLFormElement);
 
-   async function handleSubmit(evt: React.FormEvent<HTMLFormElement>) {
-      evt.preventDefault();
-  
-      setIsPending(true);
-  
-      const formData = new FormData(evt.target as HTMLFormElement);
-  
-      const { error } = await signInEmailAction(formData);
-  
-      if (error) {
-        toast.error(error);
-        setIsPending(false);
-      } else {
-        toast.success("Connexion résussie");
-        router.push("/admin");
-      }
-  
+    // const { error } = await signInEmailAction(formData);
+
+    const result = await signInEmailAction(formData);
+
+    if (!result.success) {
+      toast.error(result.error || "Erreur de connexion");
       setIsPending(false);
+      return;
     }
 
-  // if (isLoading) {
-  //   return (
-  //     <div className="flex min-h-screen items-center justify-center">
-  //       <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-  //     </div>
-  //   )
-  // }
+    toast.success("Connexion réussie");
+    router.push("/admin");
 
-  // if (user) {
-  //   return null
-  // }
+    setIsPending(false);
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-muted/50 to-muted p-4">
@@ -124,7 +88,6 @@ export default function AdminLoginPage() {
                 placeholder="admin@exemple.fr"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
                 autoComplete="email"
               />
             </div>
@@ -139,7 +102,6 @@ export default function AdminLoginPage() {
                   placeholder="Votre mot de passe"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  required
                   autoComplete="current-password"
                   className="pr-10"
                 />
@@ -174,7 +136,7 @@ export default function AdminLoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 rounded-lg bg-muted/50 p-4">
+          {/* <div className="mt-6 rounded-lg bg-muted/50 p-4">
             <p className="text-xs text-muted-foreground text-center">
               <strong>Identifiants par defaut:</strong>
               <br />
@@ -182,7 +144,7 @@ export default function AdminLoginPage() {
               <br />
               Mot de passe: admin123
             </p>
-          </div>
+          </div> */}
         </CardContent>
       </Card>
     </div>

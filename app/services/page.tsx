@@ -1,17 +1,17 @@
-import type { Metadata } from "next"
-import Link from "next/link"
-import { Check } from "lucide-react"
-import { FadeIn, StaggerContainer, StaggerItem } from "@/components/motion"
-import { getServicesAction } from "@/actions/service.actions"
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Check } from "lucide-react";
+import { FadeIn, StaggerContainer, StaggerItem } from "@/components/motion";
+import { getServicesAction } from "@/actions/service.actions";
 
 export const metadata: Metadata = {
   title: "Services",
   description:
     "Découvrez les prestations photographiques de Vaan Charles : mariage, portrait, mode et événementiel. Tarifs et formules adaptées à vos besoins.",
-}
+};
 
 export default async function ServicesPage() {
-  const services = await getServicesAction()
+  const services = await getServicesAction();
 
   return (
     <>
@@ -24,7 +24,9 @@ export default async function ServicesPage() {
             Mes Services
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-primary-foreground/60">
-            {"Des formules adaptées à chaque besoin, avec un engagement constant pour la qualité et l'excellence."}
+            {
+              "Des formules adaptées à chaque besoin, avec un engagement constant pour la qualité et l'excellence."
+            }
           </p>
         </FadeIn>
       </section>
@@ -58,9 +60,9 @@ export default async function ServicesPage() {
 
                       {service.features.length > 0 && (
                         <ul className="mt-6 flex flex-col gap-3">
-                          {service.features.map((feature) => (
+                          {service.features.map((feature, i) => (
                             <li
-                              key={feature}
+                              key={i}
                               className="flex items-center gap-3 text-sm text-foreground"
                             >
                               <Check className="h-4 w-4 shrink-0 text-accent" />
@@ -76,7 +78,8 @@ export default async function ServicesPage() {
                           <p className="font-serif text-2xl font-semibold text-foreground">
                             À partir de {service.price}
                             <span className="text-base font-normal text-muted-foreground">
-                              {" "}€
+                              {" "}
+                              €
                             </span>
                           </p>
                         </div>
@@ -94,7 +97,9 @@ export default async function ServicesPage() {
             </StaggerContainer>
           ) : (
             <FadeIn className="text-center">
-              <p className="text-muted-foreground">Aucun service disponible pour le moment.</p>
+              <p className="text-muted-foreground">
+                Aucun service disponible pour le moment.
+              </p>
             </FadeIn>
           )}
         </div>
@@ -107,7 +112,9 @@ export default async function ServicesPage() {
               Un projet sur mesure ?
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-muted-foreground">
-              {"Chaque projet est unique. Contactez-moi pour discuter de vos besoins spécifiques et recevoir un devis personnalisé."}
+              {
+                "Chaque projet est unique. Contactez-moi pour discuter de vos besoins spécifiques et recevoir un devis personnalisé."
+              }
             </p>
             <Link
               href="/contact"
@@ -119,5 +126,5 @@ export default async function ServicesPage() {
         </div>
       </section>
     </>
-  )
+  );
 }

@@ -34,7 +34,7 @@ import {
   type ExperienceData,
 } from "@/actions/experience.actions"
 import { Plus, Loader2, Pencil, Trash2, Award } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner";
 
 const emptyExperience: ExperienceData = {
   year:        "",
@@ -51,18 +51,14 @@ export default function AdminExperiencePage() {
   const [deletingId, setDeletingId]           = useState<string | null>(null)
   const [formData, setFormData]               = useState<ExperienceData>(emptyExperience)
   const [isSaving, setIsSaving]               = useState(false)
-  const { toast } = useToast()
+  
 
   async function loadExperiences() {
     try {
       const data = await getExperiencesAction()
       setExperiences(data)
     } catch {
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les expériences.",
-        variant: "destructive",
-      })
+      toast.error("Impossible de charger les expériences.")
     } finally {
       setIsLoading(false)
     }
@@ -99,20 +95,15 @@ export default function AdminExperiencePage() {
       : await createExperienceAction(formData)
 
     if (result.success) {
-      toast({
-        title: editingExperience ? "Expérience modifiée" : "Expérience ajoutée",
-        description: editingExperience
-          ? "L'expérience a été mise à jour avec succès."
-          : "La nouvelle expérience a été créée avec succès.",
-      })
+      if (editingExperience) {
+        toast.success("L'expérience a été mise à jour avec succès.")
+      }else{
+        toast.success("La nouvelle expérience a été créée avec succès.")
+      }
       await loadExperiences()
       handleCloseDialog()
     } else {
-      toast({
-        title: "Erreur",
-        description: result.error ?? "Impossible d'enregistrer l'expérience.",
-        variant: "destructive",
-      })
+      toast.error("Impossible d'enregistrer l'expérience.")
     }
 
     setIsSaving(false)
@@ -124,17 +115,10 @@ export default function AdminExperiencePage() {
     const result = await deleteExperienceAction(deletingId)
 
     if (result.success) {
-      toast({
-        title: "Expérience supprimée",
-        description: "L'expérience a été supprimée avec succès.",
-      })
+      toast.success("L'expérience a été supprimé avec succès.")
       await loadExperiences()
     } else {
-      toast({
-        title: "Erreur",
-        description: result.error,
-        variant: "destructive",
-      })
+      toast.error(result.error)
     }
 
     setIsDeleteOpen(false)

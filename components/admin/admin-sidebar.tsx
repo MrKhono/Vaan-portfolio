@@ -1,19 +1,18 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
-// import { useAuth } from "./auth-context"
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu"
 import {
   LayoutDashboard,
   Image,
@@ -35,14 +34,11 @@ import {
   Calendar,
   CalendarCheck,
   Bell,
-} from "lucide-react";
-import {
-  getPendingAppointmentsCount,
-  getUnreadNotificationsCount,
-} from "@/lib/admin-store";
-import { useEffect, useState } from "react";
-import { signOut, useSession } from "@/lib/auth-client";
-import { toast } from "sonner";
+} from "lucide-react"
+import { getPendingAppointmentsCountAction } from "@/actions/appointment.actions"
+import { useEffect, useState } from "react"
+import { signOut, useSession } from "@/lib/auth-client"
+import { toast } from "sonner"
 
 const navigation = [
   { name: "Tableau de bord", href: "/admin", icon: LayoutDashboard },
@@ -53,12 +49,6 @@ const navigation = [
     badge: "appointments",
   },
   { name: "Disponibilites", href: "/admin/availability", icon: Calendar },
-  // {
-  //   name: "Notifications",
-  //   href: "/admin/notifications",
-  //   icon: Bell,
-  //   badge: "notifications",
-  // },
   { name: "Section Hero", href: "/admin/hero", icon: Image },
   { name: "Domaines", href: "/admin/categories", icon: FolderOpen },
   { name: "Portfolio", href: "/admin/portfolio", icon: Camera },
@@ -68,32 +58,33 @@ const navigation = [
   { name: "Experience", href: "/admin/experience", icon: Award },
   { name: "Partenaires", href: "/admin/partners", icon: Handshake },
   { name: "Services", href: "/admin/services", icon: Briefcase },
-  // { name: "Blog", href: "/admin/blog", icon: FileText },
   { name: "Administrateurs", href: "/admin/admins", icon: Users },
   { name: "Parametres", href: "/admin/settings", icon: Settings },
-];
+]
 
 export function AdminSidebar() {
-  const pathname = usePathname();
-  // const { user, logout } = useAuth()
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [pendingCount, setPendingCount] = useState(0);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const user = "Armand Khono";
+  const pathname = usePathname()
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [pendingCount, setPendingCount] = useState(0)
 
-  const { data: session, isPending } = useSession();
+  const { data: session } = useSession()
 
   useEffect(() => {
-    const updateCounts = () => {
-      setPendingCount(getPendingAppointmentsCount());
-      setUnreadCount(getUnreadNotificationsCount());
-    };
-    updateCounts();
-    const interval = setInterval(updateCounts, 5000);
-    return () => clearInterval(interval);
-  }, []);
+    async function updateCounts() {
+      try {
+        const count = await getPendingAppointmentsCountAction()
+        setPendingCount(count)
+      } catch {
+        // silencieux
+      }
+    }
 
-  const router = useRouter();
+    updateCounts()
+    const interval = setInterval(updateCounts, 60_000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const router = useRouter()
 
   async function handleClick() {
     await signOut({
@@ -101,15 +92,14 @@ export function AdminSidebar() {
         onRequest: () => {},
         onResponse: () => {},
         onError: (ctx) => {
-          toast.error(ctx.error.message);
+          toast.error(ctx.error.message)
         },
         onSuccess: () => {
-          toast.success("Déconnexion réussie !");
-          router.push("/admin/login");
-          // logout()
+          toast.success("Déconnexion réussie !")
+          router.push("/admin/login")
         },
       },
-    });
+    })
   }
 
   const SidebarContent = () => (
@@ -117,7 +107,6 @@ export function AdminSidebar() {
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b border-border px-6">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg text-primary-foreground">
-          {/* <Camera className="h-5 w-5" /> */}
           <img
             src="/sno.png"
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -135,13 +124,9 @@ export function AdminSidebar() {
       <ScrollArea className="flex-1 px-3 py-4">
         <nav className="flex flex-col gap-1">
           {navigation.map((item) => {
-            const isActive = pathname === item.href;
-            const badgeValue =
-              item.badge === "appointments"
-                ? pendingCount
-                : item.badge === "notifications"
-                  ? unreadCount
-                  : 0;
+            const isActive = pathname === item.href
+            const badgeValue = item.badge === "appointments" ? pendingCount : 0
+
             return (
               <Link
                 key={item.href}
@@ -165,11 +150,11 @@ export function AdminSidebar() {
                         : "bg-primary text-primary-foreground",
                     )}
                   >
-                    {badgeValue}
+                    {badgeValue > 99 ? "99+" : badgeValue}
                   </span>
                 )}
               </Link>
-            );
+            )
           })}
         </nav>
       </ScrollArea>
@@ -194,7 +179,6 @@ export function AdminSidebar() {
               </Avatar>
               <div className="flex flex-1 flex-col items-start text-left">
                 <span className="text-sm font-medium">{session?.user.name}</span>
-                {/* <span className="text-xs text-muted-foreground">{user?.role === "super_admin" ? "Super Admin" : "Admin"}</span> */}
               </div>
               <ChevronDown className="h-4 w-4 text-muted-foreground" />
             </Button>
@@ -224,7 +208,7 @@ export function AdminSidebar() {
         </DropdownMenu>
       </div>
     </>
-  );
+  )
 
   return (
     <>
@@ -261,5 +245,5 @@ export function AdminSidebar() {
         <SidebarContent />
       </aside>
     </>
-  );
+  )
 }
