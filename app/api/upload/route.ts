@@ -10,6 +10,13 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      return NextResponse.json(
+        { error: "BLOB_READ_WRITE_TOKEN manquant" },
+        { status: 500 }
+      )
+    }
+
     const formData = await request.formData()
     const files    = formData.getAll("files") as File[]
 
@@ -23,9 +30,9 @@ export async function POST(request: NextRequest) {
       if (!file.type.startsWith("image/")) continue
 
       const blob = await put(file.name, file, {
-        access:    "public",
-        // Génère un nom unique pour éviter les collisions
+        access:          "public",
         addRandomSuffix: true,
+        token:           process.env.BLOB_READ_WRITE_TOKEN,
       })
 
       urls.push(blob.url)
@@ -38,6 +45,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ urls })
   } catch (error) {
     console.error("Upload error:", error)
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Erreur serveur" },
+      { status: 500 }
+    )
   }
 }
