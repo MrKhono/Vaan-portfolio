@@ -5,8 +5,7 @@ import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 
-
-
+// Type qui correspond exactement à la structure du composant
 export type SiteSettings = {
   siteName: string
   siteDescription: string
