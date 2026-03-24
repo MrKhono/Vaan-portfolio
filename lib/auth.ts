@@ -1,3 +1,4 @@
+// lib/auth.ts
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
@@ -49,7 +50,7 @@ export const auth = betterAuth({
     }),
   },
   session: {
-    expiresIn: 1 * 24 * 60 * 60,
+    expiresIn: 1 * 24 * 60 * 60, // 1 jour
   },
   advanced: {
     database: {

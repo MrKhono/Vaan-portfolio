@@ -1,8 +1,9 @@
+// app/api/auth/route.ts
 import { auth } from "@/lib/auth";
 import { toNextJsHandler } from "better-auth/next-js";
 
+export const runtime = "nodejs"; 
 export const { POST, GET } = toNextJsHandler(auth);
-
 
 // this route.ts file lives in /api/auth/[..all]
 

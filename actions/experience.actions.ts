@@ -5,6 +5,8 @@ import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 
+export const runtime = "nodejs"; 
+
 export type ExperienceData = {
   year:        string
   title:       string
