@@ -3,7 +3,7 @@ import { getSessionCookie } from "better-auth/cookies"
 
 const authPath = "/admin/login"
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { nextUrl } = req
   const sessionCookie = getSessionCookie(req)
 
@@ -18,18 +18,20 @@ export async function middleware(req: NextRequest) {
   // Cookie présent → vérifier la validité réelle de la session
   if (isOnProtectedRoute && sessionCookie) {
     try {
-      // Utilise req.url comme base — fonctionne en local ET en production
       const sessionUrl = new URL("/api/auth/get-session", req.url)
 
       const response = await fetch(sessionUrl.toString(), {
         headers: { cookie: req.headers.get("cookie") ?? "" },
+        cache: "no-store", // ← pas de cache — relit toujours la session fraîche
       })
 
       const session = await response.json()
 
       if (!session?.user) {
         const redirectResponse = NextResponse.redirect(new URL(authPath, req.url))
+        // Supprime les deux variantes du cookie (http et https)
         redirectResponse.cookies.delete("better-auth.session_token")
+        redirectResponse.cookies.delete("__Secure-better-auth.session_token")
         return redirectResponse
       }
     } catch {
@@ -44,6 +46,7 @@ export async function middleware(req: NextRequest) {
 
       const response = await fetch(sessionUrl.toString(), {
         headers: { cookie: req.headers.get("cookie") ?? "" },
+        cache: "no-store",
       })
       const session = await response.json()
 

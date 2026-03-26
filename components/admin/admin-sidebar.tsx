@@ -122,19 +122,11 @@ export function AdminSidebar() {
 
   async function handleSignOut() {
     try {
-      await fetch("/api/auth/sign-out", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
+      await signOut();
     } catch {
       // silencieux
     } finally {
-      // Supprime le cookie côté client avant de rediriger
-      document.cookie = "better-auth.session_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-      document.cookie = "__Secure-better-auth.session_token=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; secure";
-
-      toast.success("Déconnexion réussie !");
-      window.location.href = "/admin/login"; // hard redirect — pas router.push
+      window.location.replace("/admin/login");
     }
   }
 
