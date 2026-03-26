@@ -22,6 +22,12 @@ async function requireAuth() {
   if (!session) throw new Error("Non autorisé")
 }
 
+function revalidateAll() {
+  revalidatePath("/", "layout")
+  revalidatePath("/about", "layout")
+  revalidatePath("/admin/partenaires", "layout")
+}
+
 export async function getPartnersAction(): Promise<Partner[]> {
   return prisma.partner.findMany({ orderBy: { createdAt: "asc" } })
 }
@@ -34,7 +40,7 @@ export async function createPartnerAction(
     if (!data.name.trim()) return { success: false, error: "Le nom est requis" }
 
     await prisma.partner.create({ data })
-    revalidatePath("/")
+    revalidateAll()
     return { success: true }
   } catch (e: unknown) {
     if (e instanceof Error && e.message === "Non autorisé")
@@ -52,7 +58,7 @@ export async function updatePartnerAction(
     if (!data.name.trim()) return { success: false, error: "Le nom est requis" }
 
     await prisma.partner.update({ where: { id }, data })
-    revalidatePath("/")
+    revalidateAll()
     return { success: true }
   } catch (e: unknown) {
     if (e instanceof Error && e.message === "Non autorisé")
@@ -67,7 +73,7 @@ export async function deletePartnerAction(
   try {
     await requireAuth()
     await prisma.partner.delete({ where: { id } })
-    revalidatePath("/")
+    revalidateAll()
     return { success: true }
   } catch (e: unknown) {
     if (e instanceof Error && e.message === "Non autorisé")
