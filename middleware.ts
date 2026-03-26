@@ -3,7 +3,7 @@ import { getSessionCookie } from "better-auth/cookies"
 
 const authPath = "/admin/login"
 
-export async function proxy(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { nextUrl } = req
   const sessionCookie = getSessionCookie(req)
 
