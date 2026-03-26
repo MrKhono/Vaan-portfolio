@@ -2,7 +2,7 @@ import { getDomainsAction } from "@/actions/domain.actions"
 import Link from "next/link"
 import { FadeIn, StaggerContainer, StaggerItem } from "../motion"
 
-// export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic";
 
 export async function CategoriesSection() {
   const domains = await getDomainsAction()

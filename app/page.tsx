@@ -5,6 +5,8 @@ import { AboutPreview } from "@/components/home/about-preview"
 import { TestimonialsSection } from "@/components/home/testimonials-section"
 import { CtaSection } from "@/components/home/cta-section"
 
+export const dynamic = "force-dynamic"
+
 export default function HomePage() {
   return (
     <>

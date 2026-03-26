@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     "Découvrez le portfolio de Vaan Charles : mariage, portrait, mode et événementiel. Des photographies qui racontent une histoire.",
 }
 
-// export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic"
 
 export default async function PortfolioPage() {
   const [projects, domains] = await Promise.all([
