@@ -31,7 +31,9 @@ import Link from "next/link"
 const DAYS_OF_WEEK = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"]
 const MONTHS = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"]
 
-type BookingStep = "date" | "time" | "details" | "confirmation"
+type BookingStep = "date" | "time" | "details" | "confirmation";
+
+export const dynamic = "force-dynamic";
 
 export default function BookingPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date())

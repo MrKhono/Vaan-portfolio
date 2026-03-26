@@ -11,6 +11,8 @@ export const metadata: Metadata = {
     "Contactez Vaan Charles pour votre projet photographique. Devis gratuit et réponse sous 24h.",
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function ContactPage() {
   const [settings, services] = await Promise.all([
     getSettingsAction(),

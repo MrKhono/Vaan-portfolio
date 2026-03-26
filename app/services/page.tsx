@@ -10,6 +10,8 @@ export const metadata: Metadata = {
     "Découvrez les prestations photographiques de Vaan Charles : mariage, portrait, mode et événementiel. Tarifs et formules adaptées à vos besoins.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function ServicesPage() {
   const services = await getServicesAction();
 
