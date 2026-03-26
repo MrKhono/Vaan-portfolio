@@ -24,9 +24,9 @@ async function requireAuth() {
 }
 
 function revalidateAll() {
-  revalidatePath("/")
-  revalidatePath("/portfolio")
-  revalidatePath("/admin/categories")
+  revalidatePath("/", "layout")          // ← invalide toute l'arborescence
+  revalidatePath("/portfolio", "layout")
+  revalidatePath("/admin/categories", "layout")
 }
 
 export async function getDomainsAction(): Promise<Domain[]> {
