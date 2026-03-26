@@ -45,6 +45,8 @@ function resolveIcon(name: string): LucideIcon {
   return (typeof icon === "function" ? icon : Camera) as LucideIcon;
 }
 
+export const dynamic = "force-dynamic"
+
 export default async function AboutPage() {
   const [about, experiences, partners] = await Promise.all([
     getAboutAction(),
