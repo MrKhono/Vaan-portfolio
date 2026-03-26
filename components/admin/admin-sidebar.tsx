@@ -94,15 +94,25 @@ export function AdminSidebar() {
   }, [])
 
   async function handleSignOut() {
-    try {
-      await signOut()
-      toast.success("Déconnexion réussie !")
-      router.push("/admin/login")
-      router.refresh()
-    } catch {
-      toast.error("Erreur lors de la déconnexion.")
-    }
+  try {
+    await signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/admin/login")
+          router.refresh()
+          toast.success("Déconnexion réussie !")
+        },
+        onError: (ctx) => {
+          toast.error(ctx.error.message)
+        },
+      },
+    })
+  } catch {
+    // Fallback — redirige même si signOut échoue
+    router.push("/admin/login")
+    router.refresh()
   }
+}
 
   const SidebarContent = () => (
     <>
