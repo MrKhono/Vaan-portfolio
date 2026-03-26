@@ -5,25 +5,28 @@ import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 
-
-
 export type DomainData = {
-  name: string
-  slug: string
+  name:        string
+  slug:        string
   description: string
-  image: string
+  image:       string
 }
 
 export type Domain = DomainData & {
-  id: string
+  id:        string
   createdAt: Date
   updatedAt: Date
 }
 
-// Vérification session réutilisable
 async function requireAuth() {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session) throw new Error("Non autorisé")
+}
+
+function revalidateAll() {
+  revalidatePath("/")
+  revalidatePath("/portfolio")
+  revalidatePath("/admin/categories")
 }
 
 export async function getDomainsAction(): Promise<Domain[]> {
@@ -40,13 +43,11 @@ export async function createDomainAction(
     if (!data.slug.trim())        return { success: false, error: "Le slug est requis" }
     if (!data.description.trim()) return { success: false, error: "La description est requise" }
 
-    // Vérifier que le slug est unique
     const existing = await prisma.domain.findUnique({ where: { slug: data.slug } })
     if (existing) return { success: false, error: "Ce slug est déjà utilisé" }
 
     await prisma.domain.create({ data })
-    revalidatePath("/")
-
+    revalidateAll()
     return { success: true }
   } catch (e: unknown) {
     if (e instanceof Error && e.message === "Non autorisé")
@@ -66,14 +67,12 @@ export async function updateDomainAction(
     if (!data.slug.trim())        return { success: false, error: "Le slug est requis" }
     if (!data.description.trim()) return { success: false, error: "La description est requise" }
 
-    // Vérifier que le slug n'est pas pris par un autre domaine
     const existing = await prisma.domain.findUnique({ where: { slug: data.slug } })
     if (existing && existing.id !== id)
       return { success: false, error: "Ce slug est déjà utilisé" }
 
     await prisma.domain.update({ where: { id }, data })
-    revalidatePath("/")
-
+    revalidateAll()
     return { success: true }
   } catch (e: unknown) {
     if (e instanceof Error && e.message === "Non autorisé")
@@ -88,7 +87,7 @@ export async function deleteDomainAction(
   try {
     await requireAuth()
     await prisma.domain.delete({ where: { id } })
-    revalidatePath("/")
+    revalidateAll()
     return { success: true }
   } catch (e: unknown) {
     if (e instanceof Error && e.message === "Non autorisé")
