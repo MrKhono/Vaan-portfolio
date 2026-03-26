@@ -2,8 +2,10 @@ import Link from "next/link"
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/motion"
 import { getProjectsAction } from "@/actions/project.actions"
 
+export const dynamic = "force-dynamic"
+
 export async function GalleryPreview() {
-  const allProjects    = await getProjectsAction()
+  const allProjects     = await getProjectsAction()
   const previewProjects = allProjects.slice(0, 6)
 
   if (previewProjects.length === 0) return null

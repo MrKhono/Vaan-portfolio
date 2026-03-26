@@ -3,6 +3,7 @@ import { Mail, Phone, MapPin, Instagram, Facebook, Twitter } from "lucide-react"
 import { FadeIn } from "@/components/motion"
 import { ContactForm } from "@/components/contact/contact-form"
 import { getSettingsAction } from "@/actions/settings.actions"
+import { getServicesAction } from "@/actions/service.actions"
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -11,9 +12,13 @@ export const metadata: Metadata = {
 }
 
 export default async function ContactPage() {
-  const settings = await getSettingsAction()
+  const [settings, services] = await Promise.all([
+    getSettingsAction(),
+    getServicesAction(),
+  ])
 
   const socialLinks = settings?.socialLinks || {}
+  const servicesTitles = services.map((s) => s.title)
 
   return (
     <>
@@ -22,11 +27,9 @@ export default async function ContactPage() {
           <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-accent">
             Contact
           </p>
-
           <h1 className="font-serif text-5xl font-semibold text-primary-foreground md:text-6xl">
             Parlons de votre projet
           </h1>
-
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-primary-foreground/60">
             Vous avez un projet en tête ? N'hésitez pas à me contacter. Je vous
             répondrai dans les 24 heures.
@@ -39,7 +42,7 @@ export default async function ContactPage() {
 
           {/* Formulaire */}
           <div className="lg:col-span-3">
-            <ContactForm />
+            <ContactForm serviceTypes={servicesTitles} />
           </div>
 
           <div className="flex flex-col gap-8 lg:col-span-2">
@@ -50,20 +53,15 @@ export default async function ContactPage() {
                 <h3 className="font-serif text-xl font-semibold text-foreground">
                   Coordonnées
                 </h3>
-
                 <ul className="mt-6 flex flex-col gap-5">
-
+                  
                   {settings?.contactEmail && (
                     <li className="flex items-start gap-4">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/20">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/20">
                         <Mail className="h-4 w-4 text-accent" />
                       </div>
-
                       <div>
-                        <p className="text-sm font-medium text-foreground">
-                          Email
-                        </p>
-
+                        <p className="text-sm font-medium text-foreground">Email</p>
                         <a
                           href={`mailto:${settings.contactEmail}`}
                           className="text-sm text-muted-foreground hover:text-foreground"
@@ -76,15 +74,11 @@ export default async function ContactPage() {
 
                   {settings?.contactPhone && (
                     <li className="flex items-start gap-4">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/20">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/20">
                         <Phone className="h-4 w-4 text-accent" />
                       </div>
-
                       <div>
-                        <p className="text-sm font-medium text-foreground">
-                          Téléphone
-                        </p>
-
+                        <p className="text-sm font-medium text-foreground">Téléphone</p>
                         <a
                           href={`tel:${settings.contactPhone.replace(/\s/g, "")}`}
                           className="text-sm text-muted-foreground hover:text-foreground"
@@ -97,16 +91,12 @@ export default async function ContactPage() {
 
                   {settings?.address && (
                     <li className="flex items-start gap-4">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/20">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/20">
                         <MapPin className="h-4 w-4 text-accent" />
                       </div>
-
                       <div>
-                        <p className="text-sm font-medium text-foreground">
-                          Studio
-                        </p>
-
-                        <p className="text-sm text-muted-foreground whitespace-pre-line">
+                        <p className="text-sm font-medium text-foreground">Studio</p>
+                        <p className="whitespace-pre-line text-sm text-muted-foreground">
                           {settings.address}
                         </p>
                       </div>
@@ -123,10 +113,9 @@ export default async function ContactPage() {
                   <h3 className="font-serif text-xl font-semibold text-foreground">
                     Réseaux sociaux
                   </h3>
-
                   <div className="mt-6 flex gap-4">
 
-                    {socialLinks?.instagram && (
+                    {socialLinks.instagram && (
                       <a
                         href={socialLinks.instagram}
                         target="_blank"
@@ -138,7 +127,7 @@ export default async function ContactPage() {
                       </a>
                     )}
 
-                    {socialLinks?.facebook && (
+                    {socialLinks.facebook && (
                       <a
                         href={socialLinks.facebook}
                         target="_blank"
@@ -150,7 +139,7 @@ export default async function ContactPage() {
                       </a>
                     )}
 
-                    {socialLinks?.twitter && (
+                    {socialLinks.twitter && (
                       <a
                         href={socialLinks.twitter}
                         target="_blank"

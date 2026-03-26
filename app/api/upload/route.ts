@@ -19,13 +19,11 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData()
     const files    = formData.getAll("files") as File[]
+    const urls     = formData.getAll("urls") as string[]
 
-    if (!files.length) {
-      return NextResponse.json({ error: "Aucun fichier" }, { status: 400 })
-    }
+    const resultUrls: string[] = []
 
-    const urls: string[] = []
-
+    // Cas 1 — Fichiers uploadés localement → Vercel Blob
     for (const file of files) {
       if (!file.type.startsWith("image/")) continue
 
@@ -35,14 +33,23 @@ export async function POST(request: NextRequest) {
         token:           process.env.BLOB_READ_WRITE_TOKEN,
       })
 
-      urls.push(blob.url)
+      resultUrls.push(blob.url)
     }
 
-    if (!urls.length) {
-      return NextResponse.json({ error: "Aucune image valide" }, { status: 400 })
+    // Cas 2 — URLs externes → retournées directement sans upload
+    for (const url of urls) {
+      if (!url.trim()) continue
+      resultUrls.push(url.trim())
     }
 
-    return NextResponse.json({ urls })
+    if (!resultUrls.length) {
+      return NextResponse.json(
+        { error: "Aucun fichier ou URL valide" },
+        { status: 400 }
+      )
+    }
+
+    return NextResponse.json({ urls: resultUrls })
   } catch (error) {
     console.error("Upload error:", error)
     return NextResponse.json(
