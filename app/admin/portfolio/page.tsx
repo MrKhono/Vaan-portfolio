@@ -229,7 +229,7 @@ export default function AdminPortfolioPage() {
             </SelectContent>
           </Select>
           <Button asChild>
-            <Link href="/admin/projets?new=true">
+            <Link href="/admin/projects?new=true">
               <Plus className="mr-2 h-4 w-4" />
               Nouveau projet
             </Link>
