@@ -69,7 +69,7 @@ export function Navbar() {
                 isScrolled ? "text-foreground" : "text-primary-foreground",
               )}
             >
-              Vaan Photographie
+              VaanPhotography
             </span>
           </Link>
 
