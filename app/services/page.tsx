@@ -44,7 +44,7 @@ export default async function ServicesPage() {
                       <img
                         src={service.image}
                         alt={`Photographie ${service.title}`}
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 object-center"
+                        className="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-105 object-center"
                       />
                       <div className="absolute inset-0 bg-linear-to-t from-[#0F0F0F]/50 to-transparent" />
                       <div className="absolute bottom-4 left-6">
