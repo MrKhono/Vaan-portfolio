@@ -1,19 +1,20 @@
 import Link from "next/link"
 import { Instagram, Facebook, Twitter, Mail, Phone, MapPin } from "lucide-react"
-import { SiteSettings } from "@/actions/settings.actions"
+import type { SiteSettings } from "@/actions/settings.actions"
 
 interface FooterProps {
   settings: SiteSettings
+  services: { id: string; title: string }[]
 }
 
-export function Footer({ settings }: FooterProps) {
+export function Footer({ settings, services }: FooterProps) {
   const socialLinks = settings?.socialLinks || {}
 
   return (
     <footer className="border-t border-border bg-card">
       <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
-
+          
           {/* Logo + description */}
           <div className="lg:col-span-1">
             <Link
@@ -30,7 +31,6 @@ export function Footer({ settings }: FooterProps) {
 
             {/* Réseaux sociaux */}
             <div className="mt-6 flex gap-4">
-
               {socialLinks?.instagram && (
                 <a
                   href={socialLinks.instagram}
@@ -66,16 +66,12 @@ export function Footer({ settings }: FooterProps) {
                   <Twitter className="h-4 w-4" />
                 </a>
               )}
-
             </div>
           </div>
 
           {/* Navigation */}
           <div>
-            <h3 className="font-serif text-lg font-semibold text-foreground">
-              Navigation
-            </h3>
-
+            <h3 className="font-serif text-lg font-semibold text-foreground">Navigation</h3>
             <ul className="mt-4 flex flex-col gap-3">
               {[
                 { href: "/", label: "Accueil" },
@@ -96,41 +92,33 @@ export function Footer({ settings }: FooterProps) {
             </ul>
           </div>
 
-          {/* Services */}
+          {/* Services dynamiques */}
           <div>
-            <h3 className="font-serif text-lg font-semibold text-foreground">
-              Services
-            </h3>
-
+            <h3 className="font-serif text-lg font-semibold text-foreground">Services</h3>
             <ul className="mt-4 flex flex-col gap-3">
-              {[
-                "Mariage",
-                "Portrait",
-                "Mode",
-                "Événementiel",
-                "Corporate",
-                "Lifestyle",
-              ].map((service) => (
-                <li key={service}>
-                  <Link
-                    href="/services"
-                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    {service}
-                  </Link>
+              {services.length > 0 ? (
+                services.map((service) => (
+                  <li key={service.id}>
+                    <Link
+                      href="/services"
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      {service.title}
+                    </Link>
+                  </li>
+                ))
+              ) : (
+                <li>
+                  <span className="text-sm text-muted-foreground">Aucun service</span>
                 </li>
-              ))}
+              )}
             </ul>
           </div>
 
           {/* Contact */}
           <div>
-            <h3 className="font-serif text-lg font-semibold text-foreground">
-              Contact
-            </h3>
-
+            <h3 className="font-serif text-lg font-semibold text-foreground">Contact</h3>
             <ul className="mt-4 flex flex-col gap-4">
-
               {settings?.contactEmail && (
                 <li className="flex items-start gap-3">
                   <Mail className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
@@ -152,22 +140,19 @@ export function Footer({ settings }: FooterProps) {
               {settings?.address && (
                 <li className="flex items-start gap-3">
                   <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
-                  <span className="text-sm text-muted-foreground whitespace-pre-line">
+                  <span className="whitespace-pre-line text-sm text-muted-foreground">
                     {settings.address}
                   </span>
                 </li>
               )}
-
             </ul>
           </div>
         </div>
 
         {/* Copyright */}
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 md:flex-row">
-
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()}{" "}
-            {settings?.siteName || "Alexandre Dupont Photographie"}.
+            © {new Date().getFullYear()} {settings?.siteName || "Alexandre Dupont Photographie"}.
             Tous droits réservés.
           </p>
 
@@ -180,7 +165,6 @@ export function Footer({ settings }: FooterProps) {
               Développé par <strong>Next In</strong>
             </Link>
           </div>
-
         </div>
       </div>
     </footer>

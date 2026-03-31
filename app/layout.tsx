@@ -8,6 +8,7 @@ import { Navbar } from "@/components/navbar"
 import "./globals.css"
 import { getSettingsAction } from "@/actions/settings.actions"
 import ConditionalLayout from "@/components/conditionalLyaout"
+import { getServicesAction } from "@/actions/service.actions"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 const playfair = Playfair_Display({
@@ -47,7 +48,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const settings = await getSettingsAction()
+  // const settings = await getSettingsAction()
+  const [settings, services] = await Promise.all([
+    getSettingsAction(),
+    getServicesAction(),
+  ])
 
   return (
     <html lang="fr" suppressHydrationWarning>
@@ -64,7 +69,7 @@ export default async function RootLayout({
         >
           <ConditionalLayout
             navbar={<Navbar />}
-            footer={<Footer settings={settings} />}
+             footer={<Footer settings={settings} services={services}  />}
           >
             <main>
               {children}
