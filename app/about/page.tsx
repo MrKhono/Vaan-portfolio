@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/motion";
 import * as LucideIcons from "lucide-react";
-import { Camera, Heart, Eye, Award, type LucideIcon } from "lucide-react";
+import { Camera, Heart, Eye, Award, type LucideIcon, Users } from "lucide-react";
 import { getAboutAction } from "@/actions/about.actions";
 import { getExperiencesAction } from "@/actions/experience.actions";
 import { getPartnersAction } from "@/actions/partner.actions";
@@ -18,25 +18,25 @@ const fallbackValues = [
     icon: Eye,
     title: "Vision",
     description:
-      "Chaque projet commence par une vision claire. Je cherche à voir au-delà de l'évident pour capturer l'essence véritable d'un moment.",
+      "Chaque projet commence par une vision claire.Chaque projet est unique et co-construit ensemble",
+  },
+  {
+    icon: Users,
+    title: "Humanité",
+    description:
+      "Mettre la personne au centre du projet.Respecter chaque histoire, chaque sensibilité, chaque singularité.",
+  },
+  {
+    icon: Award,
+    title: "Confiance",
+    description:
+      "Créer un espace simple et rassurant, où chacun peut se montrer tel qu’il est, sans retenue",
   },
   {
     icon: Heart,
     title: "Émotion",
     description:
       "La photographie est avant tout une question d'émotion. Je m'efforce de créer des images qui touchent le cœur et racontent une histoire.",
-  },
-  {
-    icon: Camera,
-    title: "Excellence",
-    description:
-      "La maîtrise technique est au service de la créativité. Je perfectionne constamment mon art pour offrir un travail d'exception.",
-  },
-  {
-    icon: Award,
-    title: "Authenticité",
-    description:
-      "Pas de poses forcées, pas d'artifices. Je privilégie le naturel et la spontanéité pour des images vraies et intemporelles.",
   },
 ];
 
@@ -103,17 +103,17 @@ export default async function AboutPage() {
             <div className="mt-6 flex flex-col gap-4 text-lg leading-relaxed text-muted-foreground">
               <p>
                 {
-                  "Depuis mon enfance, j'ai toujours été fasciné par la lumière et la façon dont elle transforme le monde qui nous entoure. C'est cette passion qui m'a naturellement conduit vers la photographie."
+                  "Photographe depuis une dizaine d’années, je me suis naturellement tourné vers le portrait. C’est là que tout prend sens : capter un regard, une présence, un sourire."
                 }
               </p>
               <p>
                 {
-                  "Après une formation aux Beaux-Arts et plusieurs années en tant qu'assistant dans les plus grands studios parisiens, j'ai lancé mon propre studio en 2016. Depuis, j'ai eu le privilège de travailler avec des couples, des marques de mode prestigieuses et des entreprises du monde entier."
+                  "Je privilégie la simplicité et le naturel, pour créer des images sincères, sans artifice. Mon objectif est de mettre en valeur chaque personne, telle qu’elle est, et de révéler ce qui la rend unique."
                 }
               </p>
               <p>
                 {
-                  "Mon approche est simple : écouter, observer, puis capturer. Je crois profondément que les plus belles images naissent de la connexion authentique entre le photographe et son sujet."
+                  "Pour y arriver, je prend le temps d'échanger afin de créer une atmosphère de confiance. C'est le secret derrière des photos réussies."
                 }
               </p>
             </div>

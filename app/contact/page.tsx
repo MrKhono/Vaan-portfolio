@@ -1,15 +1,22 @@
-import type { Metadata } from "next"
-import { Mail, Phone, MapPin, Instagram, Facebook, Twitter } from "lucide-react"
-import { FadeIn } from "@/components/motion"
-import { ContactForm } from "@/components/contact/contact-form"
-import { getSettingsAction } from "@/actions/settings.actions"
-import { getServicesAction } from "@/actions/service.actions"
+import type { Metadata } from "next";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Instagram,
+  Facebook,
+  Twitter,
+} from "lucide-react";
+import { FadeIn } from "@/components/motion";
+import { ContactForm } from "@/components/contact/contact-form";
+import { getSettingsAction } from "@/actions/settings.actions";
+import { getServicesAction } from "@/actions/service.actions";
 
 export const metadata: Metadata = {
   title: "Contact",
   description:
     "Contactez Vaan Charles pour votre projet photographique. Devis gratuit et réponse sous 24h.",
-}
+};
 
 export const dynamic = "force-dynamic";
 
@@ -17,10 +24,10 @@ export default async function ContactPage() {
   const [settings, services] = await Promise.all([
     getSettingsAction(),
     getServicesAction(),
-  ])
+  ]);
 
-  const socialLinks = settings?.socialLinks || {}
-  const servicesTitles = services.map((s) => s.title)
+  const socialLinks = settings?.socialLinks || {};
+  const servicesTitles = services.map((s) => s.title);
 
   return (
     <>
@@ -41,14 +48,12 @@ export default async function ContactPage() {
 
       <section className="bg-background px-6 py-24 lg:px-8 lg:py-32">
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-5 lg:gap-16">
-
           {/* Formulaire */}
           <div className="lg:col-span-3">
             <ContactForm serviceTypes={servicesTitles} />
           </div>
 
           <div className="flex flex-col gap-8 lg:col-span-2">
-
             {/* Coordonnées */}
             <FadeIn delay={0.1}>
               <div className="rounded-xl bg-card p-8 shadow-sm">
@@ -56,14 +61,15 @@ export default async function ContactPage() {
                   Coordonnées
                 </h3>
                 <ul className="mt-6 flex flex-col gap-5">
-                  
                   {settings?.contactEmail && (
                     <li className="flex items-start gap-4">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/20">
                         <Mail className="h-4 w-4 text-accent" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-foreground">Email</p>
+                        <p className="text-sm font-medium text-foreground">
+                          Email
+                        </p>
                         <a
                           href={`mailto:${settings.contactEmail}`}
                           className="text-sm text-muted-foreground hover:text-foreground"
@@ -80,7 +86,9 @@ export default async function ContactPage() {
                         <Phone className="h-4 w-4 text-accent" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-foreground">Téléphone</p>
+                        <p className="text-sm font-medium text-foreground">
+                          Téléphone
+                        </p>
                         <a
                           href={`tel:${settings.contactPhone.replace(/\s/g, "")}`}
                           className="text-sm text-muted-foreground hover:text-foreground"
@@ -97,7 +105,9 @@ export default async function ContactPage() {
                         <MapPin className="h-4 w-4 text-accent" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-foreground">Studio</p>
+                        <p className="text-sm font-medium text-foreground">
+                          Studio
+                        </p>
                         <p className="whitespace-pre-line text-sm text-muted-foreground">
                           {settings.address}
                         </p>
@@ -116,7 +126,6 @@ export default async function ContactPage() {
                     Réseaux sociaux
                   </h3>
                   <div className="mt-6 flex gap-4">
-
                     {socialLinks.instagram && (
                       <a
                         href={socialLinks.instagram}
@@ -152,7 +161,6 @@ export default async function ContactPage() {
                         <Twitter className="h-5 w-5" />
                       </a>
                     )}
-
                   </div>
                 </div>
               </FadeIn>
@@ -163,7 +171,7 @@ export default async function ContactPage() {
               <div className="overflow-hidden rounded-xl shadow-sm">
                 <iframe
                   title="Localisation du studio"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.9916256937604!2d2.3364379999999997!3d48.8606146!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e66e2964e34e2d%3A0x8ddca9ee380ef7e0!2sLouvre!5e0!3m2!1sen!2sfr!4v1234567890"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.569953658636!2d2.5247886123173053!3d48.86641040002225!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e612136c5e24eb%3A0x76377bc5d4fcd985!2s3%20Rue%20Louis%20Vannini%2C%2093330%20Neuilly-sur-Marne%2C%20France!5e0!3m2!1sen!2ssn!4v1774926101947!5m2!1sen!2ssn"
                   className="h-[250px] w-full border-0"
                   allowFullScreen
                   loading="lazy"
@@ -171,10 +179,9 @@ export default async function ContactPage() {
                 />
               </div>
             </FadeIn>
-
           </div>
         </div>
       </section>
     </>
-  )
+  );
 }

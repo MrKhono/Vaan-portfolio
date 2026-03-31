@@ -45,7 +45,7 @@ export async function sendContactEmailAction(
 
     const { data: resendData, error: resendError } = await resend.emails.send({
       from:    "Contact <contact@vaanphotography.fr>",
-      to:      [toEmail],
+      to:      [process.env.RESEND_TEST_EMAIL || toEmail],
       replyTo: data.email,
       subject: `[Contact] ${data.subject}`,
       html:    buildEmailHtml(data),
