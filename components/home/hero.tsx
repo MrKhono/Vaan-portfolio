@@ -35,7 +35,7 @@ export async function Hero() {
           <img
             src={hero.image}
             alt="Photographie artistique"
-            className="h-full w-full object-cover object-left md:object-center"
+            className="h-full w-full object-cover object-right md:object-center"
           />
         </HeroImageWrapper>
         <div className="absolute inset-0 bg-linear-to-b from-[#0F0F0F]/60 via-[#0F0F0F]/40 to-[#0F0F0F]/80" />
