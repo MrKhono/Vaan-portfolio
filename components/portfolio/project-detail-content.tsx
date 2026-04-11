@@ -129,7 +129,7 @@ export function ProjectDetailContent({
                       <img
                         src={img}
                         alt={`${project.title} — Photo ${i + 1}`}
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-105"
                       />
                     </div>
                     <div className="absolute inset-0 flex items-center justify-center bg-[#0F0F0F]/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
