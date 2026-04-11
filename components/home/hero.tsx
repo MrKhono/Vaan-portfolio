@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { ArrowDown } from "lucide-react";
+import Link from "next/link"
+import { ArrowDown } from "lucide-react"
 import {
   HeroImageWrapper,
   HeroTagline,
@@ -7,26 +7,25 @@ import {
   HeroSubtitle,
   HeroButtons,
   HeroScrollIndicator,
-} from "./hero-animations";
-import { getHeroAction } from "@/actions/hero.actions";
+} from "./hero-animations"
+import { getHeroAction } from "@/actions/hero.actions"
 
 const defaultHero = {
   title: "Capturer l'essence\nde chaque instant",
-  subtitle:
-    "L'art de raconter votre histoire à travers une photographie authentique, élégante et intemporelle.",
+  subtitle: "L'art de raconter votre histoire à travers une photographie authentique, élégante et intemporelle.",
   image: "/images/hero.jpg",
-};
+}
 
 export async function Hero() {
-  const data = await getHeroAction();
+  const data = await getHeroAction()
 
   const hero = {
     title: data.title || defaultHero.title,
     subtitle: data.subtitle || defaultHero.subtitle,
     image: data.image || defaultHero.image,
-  };
+  }
 
-  const titleLines = hero.title.split("\n");
+  const titleLines = hero.title.split("\n")
 
   return (
     <section className="relative flex h-screen items-center justify-center overflow-hidden">
@@ -35,14 +34,16 @@ export async function Hero() {
           <img
             src={hero.image}
             alt="Photographie artistique"
-            className="h-full w-full object-cover object-right md:object-center"
+            className="h-full w-full object-cover"
           />
         </HeroImageWrapper>
         <div className="absolute inset-0 bg-linear-to-b from-[#0F0F0F]/60 via-[#0F0F0F]/40 to-[#0F0F0F]/80" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-5xl px-6 text-center">
-        <HeroTagline>Photographe Professionnel</HeroTagline>
+        <HeroTagline>
+          Photographe Professionnel
+        </HeroTagline>
 
         <HeroTitle>
           {titleLines.map((line, i) => (
@@ -52,7 +53,9 @@ export async function Hero() {
           ))}
         </HeroTitle>
 
-        <HeroSubtitle>{hero.subtitle}</HeroSubtitle>
+        <HeroSubtitle>
+          {hero.subtitle}
+        </HeroSubtitle>
 
         <HeroButtons>
           <Link
@@ -74,5 +77,5 @@ export async function Hero() {
         <ArrowDown className="h-5 w-5 text-[#F8F8F8]/50" />
       </HeroScrollIndicator>
     </section>
-  );
+  )
 }
