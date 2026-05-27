@@ -125,7 +125,7 @@ export function ProjectDetailContent({
                     onClick={() => { setLightboxIndex(i); setLightboxOpen(true) }}
                     className="group relative block w-full overflow-hidden rounded-xl"
                   >
-                    <div className="aspect-4/3">
+                    <div className="aspect-3/4">
                       <img
                         src={img}
                         alt={`${project.title} — Photo ${i + 1}`}
