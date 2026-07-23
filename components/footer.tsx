@@ -158,11 +158,11 @@ export function Footer({ settings, services }: FooterProps) {
 
           <div className="flex gap-6">
             <Link
-              href="https://www.linkedin.com/in/armand-khono1/"
+              href="www.linkedin.com/in/armand-khono1"
               target="_blank"
               className="text-xs text-muted-foreground transition-colors hover:text-foreground"
             >
-              Développé par <strong>Next In</strong>
+              Développé par <strong>Next Innovation</strong>
             </Link>
           </div>
         </div>
