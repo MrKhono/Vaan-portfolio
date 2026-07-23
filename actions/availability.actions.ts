@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
+import { formatDateLocal, parseDateLocal } from "@/lib/utils"
 
 export type TimeSlot = {
   start: string
@@ -94,14 +95,14 @@ export async function copyToWeekAction(
   try {
     await requireAuth()
 
-    const current    = new Date(date)
+    const current    = parseDateLocal(date)
     const dayOfWeek  = current.getDay()
 
     for (let i = 1; i <= 5; i++) {
       if (i === dayOfWeek) continue
       const target = new Date(current)
       target.setDate(current.getDate() - dayOfWeek + i)
-      const targetDate = target.toISOString().split("T")[0]
+      const targetDate = formatDateLocal(target)
 
       await prisma.availability.upsert({
         where:  { date: targetDate },

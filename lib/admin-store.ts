@@ -2,6 +2,7 @@
 
 import { projects, testimonials, services, categories } from "./data"
 import type { Project, Testimonial, Service, BlogPost } from "./data"
+import { parseDateLocal } from "./utils"
 
 // Types for admin data
 export interface Admin {
@@ -581,7 +582,7 @@ export function simulateEmail(
   let subject = ""
   let body = ""
   
-  const dateFormatted = new Date(appointment.date).toLocaleDateString("fr-FR", {
+  const dateFormatted = parseDateLocal(appointment.date).toLocaleDateString("fr-FR", {
     weekday: "long",
     year: "numeric",
     month: "long",

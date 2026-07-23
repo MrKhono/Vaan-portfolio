@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/select"
 import { Clock, Copy, Loader2, Plus, Trash2 } from "lucide-react"
 import type { TimeSlot } from "@/actions/availability.actions"
+import { parseDateLocal } from "@/lib/utils"
 
 const TIME_OPTIONS = [
   "08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30",
@@ -44,7 +45,7 @@ export function AvailabilitySlotsDialog({
   onCopyWeek,
 }: AvailabilitySlotsDialogProps) {
   const dateLabel = selectedDate
-    ? new Date(selectedDate).toLocaleDateString("fr-FR", {
+    ? parseDateLocal(selectedDate).toLocaleDateString("fr-FR", {
         weekday: "long", day: "numeric", month: "long", year: "numeric",
       })
     : ""

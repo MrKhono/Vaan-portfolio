@@ -13,7 +13,7 @@ import {
   CalendarCheck, Check, X, MoreHorizontal,
   Eye, Trash2,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn, parseDateLocal } from "@/lib/utils"
 import { STATUS_CONFIG } from "@/lib/status-config"
 import type { Appointment } from "@/actions/appointment.actions"
 
@@ -37,7 +37,7 @@ export function AppointmentsTable({
   onDelete,
 }: AppointmentsTableProps) {
   const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString("fr-FR", {
+    parseDateLocal(d).toLocaleDateString("fr-FR", {
       weekday: "short", day: "numeric", month: "short", year: "numeric",
     })
 

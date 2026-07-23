@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Calendar, CalendarCheck, AlertCircle, CheckCircle2 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn, formatDateLocal } from "@/lib/utils"
 import type { Appointment } from "@/actions/appointment.actions"
 
 interface AppointmentsStatsProps {
@@ -11,7 +11,7 @@ export function AppointmentsStats({ appointments }: AppointmentsStatsProps) {
   const pendingCount   = appointments.filter((a) => a.status === "pending").length
   const confirmedCount = appointments.filter((a) => a.status === "confirmed").length
   const todayCount     = appointments.filter(
-    (a) => a.date === new Date().toISOString().split("T")[0] && a.status === "confirmed"
+    (a) => a.date === formatDateLocal(new Date()) && a.status === "confirmed"
   ).length
 
   const stats = [

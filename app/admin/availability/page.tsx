@@ -15,6 +15,7 @@ import { AvailabilityCalendar } from "./availability-calendar"
 import { AvailabilityCopyDialog } from "./availability-copy-dialog"
 import { AvailabilitySidebar } from "./availability-sidebar"
 import { AvailabilitySlotsDialog } from "./availability-slots-dialog"
+import { formatDateLocal } from "@/lib/utils"
 
 export default function AvailabilityPage() {
   const [availabilities, setAvailabilities] = useState<Availability[]>([])
@@ -28,7 +29,7 @@ export default function AvailabilityPage() {
   const [isCopying, setIsCopying]           = useState(false)
   const { toast } = useToast()
 
-  const today = new Date().toISOString().split("T")[0]
+  const today = formatDateLocal(new Date())
 
   async function loadAvailabilities() {
     const data = await getAvailabilitiesAction()
@@ -38,7 +39,7 @@ export default function AvailabilityPage() {
   useEffect(() => { loadAvailabilities() }, [])
 
   async function handleDateClick(date: Date) {
-    const dateStr  = date.toISOString().split("T")[0]
+    const dateStr  = formatDateLocal(date)
     const existing = await getAvailabilityForDateAction(dateStr)
     setSelectedDate(dateStr)
     setSlots(existing?.slots || [])

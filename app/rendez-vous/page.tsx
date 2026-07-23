@@ -25,7 +25,7 @@ import { createAppointmentAction } from "@/actions/appointment.actions"
 import { getServicesAction } from "@/actions/service.actions"
 import { getSettingsAction } from "@/actions/settings.actions"
 import { FadeIn } from "@/components/motion"
-import { cn } from "@/lib/utils"
+import { cn, formatDateLocal, parseDateLocal } from "@/lib/utils"
 import Link from "next/link"
 
 const DAYS_OF_WEEK = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"]
@@ -57,7 +57,7 @@ export default function BookingPage() {
         getServicesAction(),
         getSettingsAction(),
       ])
-      const today = new Date().toISOString().split("T")[0]
+      const today = formatDateLocal(new Date())
       setAvailableDates(avs.filter((a) => a.date >= today && a.slots.length > 0).map((a) => a.date))
       setServices(svcs)
       setAddress(settings.address)
@@ -70,7 +70,7 @@ export default function BookingPage() {
     getAvailableSlotsForDateAction(selectedDate).then(setAvailableSlots)
   }, [selectedDate])
 
-  const formatDate = (d: Date) => d.toISOString().split("T")[0]
+  const formatDate = (d: Date) => formatDateLocal(d)
 
   const calendarDays = useMemo(() => {
     const year  = currentMonth.getFullYear()
@@ -91,7 +91,7 @@ export default function BookingPage() {
   const today = formatDate(new Date())
 
   const selectedDateFormatted = selectedDate
-    ? new Date(selectedDate).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
+    ? parseDateLocal(selectedDate).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
     : ""
 
   const handleDateSelect = (date: Date) => {

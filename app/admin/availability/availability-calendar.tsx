@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn, formatDateLocal } from "@/lib/utils"
 import type { Availability } from "@/actions/availability.actions"
 
 const DAYS_OF_WEEK = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"]
@@ -32,7 +32,7 @@ export function AvailabilityCalendar({
   }
 
   function formatDate(d: Date) {
-    return d.toISOString().split("T")[0]
+    return formatDateLocal(d)
   }
 
   return (
