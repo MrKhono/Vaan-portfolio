@@ -162,7 +162,7 @@ export function Footer({ settings, services }: FooterProps) {
               target="_blank"
               className="text-xs text-muted-foreground transition-colors hover:text-foreground"
             >
-              Développé par <strong>Next-Innovation</strong>
+              Développé par <strong>Armand Khono</strong>
             </Link>
           </div>
         </div>
