@@ -1,7 +1,7 @@
-import { createAuthClient } from "better-auth/react";
+import { createAuthClient } from "better-auth/react"
 
-const authClient = createAuthClient({
-    baseURL: process.env.NEXT_PUBLIC_API_URL
+export const authClient = createAuthClient({
+  baseURL: process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000",
 })
 
-export const { signUp, signOut, signIn, useSession } = authClient
+export const { signUp, signOut, signIn, useSession, requestPasswordReset, resetPassword } = authClient

@@ -17,6 +17,7 @@ import { Loader2, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { signInEmailAction } from "@/actions/sign-in-email.action";
+import Link from "next/link";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
@@ -122,6 +123,15 @@ export default function AdminLoginPage() {
                   </span>
                 </Button>
               </div>
+            </div>
+
+            <div className="flex justify-end">
+              <Link
+                href="/admin/forgot-password"
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
+                Mot de passe oublié ?
+              </Link>
             </div>
 
             <Button type="submit" className="w-full" disabled={isPending}>

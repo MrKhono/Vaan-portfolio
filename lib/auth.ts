@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma"
 import { hashPassword, verifyPassword } from "@/lib/argon2"
 import { APIError, createAuthMiddleware } from "better-auth/api"
 import { getValidDomain, normalizeName } from "@/lib/utils"
+import { sendResetPasswordEmail } from "@/lib/emails/reset-password"
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -18,14 +19,26 @@ export const auth = betterAuth({
   ],
 
   emailAndPassword: {
-    enabled: true,
-    minPasswordLength: 6,
-    autoSignIn: false,
+    enabled:            true,
+    minPasswordLength:  6,
+    autoSignIn:         false,
     password: {
-      hash: hashPassword,
+      hash:   hashPassword,
       verify: verifyPassword,
     },
+
+    // Ajout de la gestion du mot de passe oublié
+    sendResetPassword: async ({ user, url }) => {
+      await sendResetPasswordEmail({
+        to:   user.email,
+        name: user.name,
+        url,
+      })
+    },
+
+    resetPasswordTokenExpiresIn: 3600, // 1 heure
   },
+
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
       if (ctx.path === "/sign-up/email") {
@@ -50,6 +63,7 @@ export const auth = betterAuth({
       }
     }),
   },
+
   session: {
     expiresIn: 1 * 24 * 60 * 60,
   },
