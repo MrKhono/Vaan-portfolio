@@ -7,16 +7,17 @@ import { revalidatePath } from "next/cache"
 
 // Type qui correspond exactement à la structure du composant
 export type SiteSettings = {
-  siteName: string
+  siteName:        string
   siteDescription: string
-  contactEmail: string
-  contactPhone: string
-  address: string
+  logo:            string
+  contactEmail:    string
+  contactPhone:    string
+  address:         string
   socialLinks: {
     instagram: string
-    facebook: string
-    twitter: string
-    linkedin: string
+    facebook:  string
+    twitter:   string
+    linkedin:  string
   }
 }
 
@@ -26,6 +27,7 @@ export async function getSettingsAction(): Promise<SiteSettings> {
   return {
     siteName:        s?.siteName       ?? "",
     siteDescription: s?.seoDescription ?? "",
+    logo:            s?.logo           ?? "",
     contactEmail:    s?.email          ?? "",
     contactPhone:    s?.phone          ?? "",
     address:         s?.address        ?? "",
@@ -56,6 +58,7 @@ export async function updateSettingsAction(
     const payload = {
       siteName:       data.siteName,
       seoDescription: data.siteDescription,
+      logo:           data.logo,
       email:          data.contactEmail,
       phone:          data.contactPhone,
       address:        data.address,
@@ -68,13 +71,14 @@ export async function updateSettingsAction(
     if (existing) {
       await prisma.siteSettings.update({
         where: { id: existing.id },
-        data: payload,
+        data:  payload,
       })
     } else {
       await prisma.siteSettings.create({ data: payload })
     }
 
-    revalidatePath("/")
+    revalidatePath("/", "layout")
+    revalidatePath("/admin",         "layout")
 
     return { success: true }
   } catch {

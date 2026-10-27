@@ -7,9 +7,8 @@ import {
   Select, SelectContent, SelectItem,
   SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { Clock, Copy, Loader2, Plus, Trash2 } from "lucide-react"
+import { Clock, Copy, CalendarRange, Loader2, Plus, Trash2 } from "lucide-react"
 import type { TimeSlot } from "@/actions/availability.actions"
-import { parseDateLocal } from "@/lib/utils"
 
 const TIME_OPTIONS = [
   "08:00","08:30","09:00","09:30","10:00","10:30","11:00","11:30",
@@ -29,6 +28,7 @@ interface AvailabilitySlotsDialogProps {
   onRemoveSlot: (index: number) => void
   onSave:       () => void
   onCopyWeek:   () => void
+  onCopyMonth:  () => void   // ← nouveau prop
 }
 
 export function AvailabilitySlotsDialog({
@@ -43,9 +43,10 @@ export function AvailabilitySlotsDialog({
   onRemoveSlot,
   onSave,
   onCopyWeek,
+  onCopyMonth,
 }: AvailabilitySlotsDialogProps) {
   const dateLabel = selectedDate
-    ? parseDateLocal(selectedDate).toLocaleDateString("fr-FR", {
+    ? new Date(selectedDate).toLocaleDateString("fr-FR", {
         weekday: "long", day: "numeric", month: "long", year: "numeric",
       })
     : ""
@@ -109,14 +110,20 @@ export function AvailabilitySlotsDialog({
           </div>
         </div>
 
-        <DialogFooter className="flex-col gap-2 sm:flex-row">
+        <DialogFooter className="flex-col gap-2 sm:flex-col">
           {slots.length > 0 && (
-            <Button variant="outline" onClick={onCopyWeek} className="w-full sm:w-auto">
-              <Copy className="mr-2 h-4 w-4" />
-              Copier sur la semaine
-            </Button>
+            <div className="flex w-full flex-col gap-2 sm:flex-row">
+              <Button variant="outline" onClick={onCopyWeek} className="w-full sm:w-auto">
+                <Copy className="mr-2 h-4 w-4" />
+                Copier sur la semaine
+              </Button>
+              <Button variant="outline" onClick={onCopyMonth} className="w-full sm:w-auto">
+                <CalendarRange className="mr-2 h-4 w-4" />
+                Appliquer au mois
+              </Button>
+            </div>
           )}
-          <div className="flex gap-2">
+          <div className="flex w-full justify-end gap-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>Annuler</Button>
             <Button onClick={onSave} disabled={isSaving}>
               {isSaving

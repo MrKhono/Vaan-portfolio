@@ -14,10 +14,11 @@ import {
   LayoutDashboard, Image, FolderOpen, Camera, User,
   MessageSquare, Award, Handshake, Briefcase, Settings,
   Users, LogOut, ChevronDown, Menu, X, Home,
-  Calendar, CalendarCheck,
+  Calendar, CalendarCheck, Images, Palette,
 } from "lucide-react"
 import { getPendingAppointmentsCountAction } from "@/actions/appointment.actions"
 import { getCurrentUserAction, type AdminUser } from "@/actions/user.actions"
+import { getSettingsAction } from "@/actions/settings.actions"
 import { useEffect, useState } from "react"
 import { signOut, useSession } from "@/lib/auth-client"
 import { toast } from "sonner"
@@ -29,6 +30,7 @@ const navigation = [
   { name: "Section Hero",    href: "/admin/hero",         icon: Image                               },
   { name: "Domaines",        href: "/admin/categories",   icon: FolderOpen                          },
   { name: "Portfolio",       href: "/admin/portfolio",    icon: Camera                              },
+  { name: "Galerie accueil", href: "/admin/home-gallery", icon: Images                              },
   { name: "Projets",         href: "/admin/projects",     icon: FolderOpen                          },
   { name: "À propos",        href: "/admin/about",        icon: User                                },
   { name: "Témoignages",     href: "/admin/testimonials", icon: MessageSquare                       },
@@ -36,6 +38,7 @@ const navigation = [
   { name: "Partenaires",     href: "/admin/partners",     icon: Handshake                           },
   { name: "Services",        href: "/admin/services",     icon: Briefcase                           },
   { name: "Administrateurs", href: "/admin/admins",       icon: Users                               },
+  { name: "Branding",        href: "/admin/branding",     icon: Palette                             },
   { name: "Paramètres",      href: "/admin/settings",     icon: Settings                            },
 ]
 
@@ -46,6 +49,8 @@ export function AdminSidebar() {
   const [mobileOpen, setMobileOpen]     = useState(false)
   const [pendingCount, setPendingCount] = useState(0)
   const [currentUser, setCurrentUser]   = useState<AdminUser | null>(null)
+  const [siteLogo, setSiteLogo]         = useState<string>("")
+  const [siteName, setSiteName]         = useState<string>("")
 
   // Charge les données fraîches depuis la BDD
   useEffect(() => {
@@ -74,10 +79,28 @@ export function AdminSidebar() {
     loadUser()
   }, [session?.user?.id])
 
-  const name      = currentUser?.name  ?? session?.user?.name  ?? ""
-  const email     = currentUser?.email ?? session?.user?.email ?? ""
-  const image     = currentUser?.image ?? session?.user?.image ?? ""
-  const initials  = name.split(" ").map((n) => n[0]).join("").toUpperCase() || "AD"
+  // Charge le logo et le nom du site depuis les settings
+  useEffect(() => {
+    async function loadBranding() {
+      try {
+        const settings = await getSettingsAction()
+        setSiteLogo(settings.logo ?? "")
+        setSiteName(settings.siteName ?? "")
+      } catch {
+        // silencieux
+      }
+    }
+    loadBranding()
+
+    // Rafraîchit toutes les 60s pour prendre en compte les changements de branding
+    const interval = setInterval(loadBranding, 60_000)
+    return () => clearInterval(interval)
+  }, [pathname])
+
+  const name     = currentUser?.name  ?? session?.user?.name  ?? ""
+  const email    = currentUser?.email ?? session?.user?.email ?? ""
+  const image    = currentUser?.image ?? session?.user?.image ?? ""
+  const initials = name.split(" ").map((n) => n[0]).join("").toUpperCase() || "AD"
 
   useEffect(() => {
     async function updateCounts() {
@@ -108,11 +131,17 @@ export function AdminSidebar() {
     <>
       {/* Logo */}
       <div className="flex h-16 shrink-0 items-center gap-3 border-b border-border px-6">
-        <div className="flex h-9 w-9 shrink-0 overflow-hidden rounded-lg">
-          <img src="/sno.png" alt="Logo" className="h-full w-full object-cover" />
+        <div className="flex h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-muted">
+          <img
+            src={siteLogo || "/sno.png"}
+            alt={siteName || "Logo"}
+            className="h-full w-full object-contain"
+          />
         </div>
-        <div className="flex flex-col">
-          <span className="font-serif text-lg font-semibold">Admin</span>
+        <div className="flex min-w-0 flex-col">
+          <span className="truncate font-serif text-lg font-semibold">
+            {siteName || "Admin"}
+          </span>
           <span className="truncate text-xs text-muted-foreground">{name}</span>
         </div>
       </div>

@@ -1,75 +1,73 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sun, Moon } from "lucide-react";
-import { useTheme } from "next-themes";
-import { cn } from "@/lib/utils";
-import Image from "next/image";
+import { useState, useEffect } from "react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { motion, AnimatePresence } from "framer-motion"
+import { Menu, X, Sun, Moon } from "lucide-react"
+import { useTheme } from "next-themes"
+import { cn } from "@/lib/utils"
+import type { SiteSettings } from "@/actions/settings.actions"
 
 const navLinks = [
-  { href: "/", label: "Accueil" },
-  { href: "/about", label: "A propos" },
-  { href: "/portfolio", label: "Portfolio" },
-  { href: "/services", label: "Services" },
+  { href: "/",            label: "Accueil"     },
+  { href: "/about",       label: "A propos"    },
+  { href: "/portfolio",   label: "Portfolio"   },
+  { href: "/services",    label: "Services"    },
   { href: "/rendez-vous", label: "Rendez-vous" },
-  { href: "/contact", label: "Contact" },
-];
+  { href: "/contact",     label: "Contact"     },
+]
 
-export function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const pathname = usePathname();
-  const { theme, setTheme } = useTheme();
+interface NavbarProps {
+  settings: SiteSettings
+}
+
+export function Navbar({ settings }: NavbarProps) {
+  const [isScrolled, setIsScrolled]     = useState(false)
+  const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [mounted, setMounted]           = useState(false)
+  const pathname                        = usePathname()
+  const { theme, setTheme }             = useTheme()
+
+  const logoUrl  = settings?.logo     || "/sno.png"
+  const siteName = settings?.siteName || "VaanPhotography"
+
+  useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    const handleScroll = () => setIsScrolled(window.scrollY > 50)
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    setIsMobileOpen(false);
-  }, [pathname]);
+  useEffect(() => { setIsMobileOpen(false) }, [pathname])
 
   return (
     <>
       <header
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+          "fixed left-0 right-0 top-0 z-50 transition-all duration-500",
           isScrolled
-            ? "bg-background/80 backdrop-blur-xl border-b border-border shadow-sm"
+            ? "border-b border-border bg-background/80 shadow-sm backdrop-blur-xl"
             : "bg-transparent",
         )}
       >
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
-          <Link
-            href="/"
-            className="group relative z-10 flex items-center gap-2"
-          >
-            <Image
-              src="/sno.png"
-              alt="Vaan Photographie"
+          <Link href="/" className="group relative z-10 flex items-center gap-2">
+            <img
+              src={logoUrl}
+              alt={siteName}
               width={40}
               height={40}
-              className="object-contain bg-white rounded-full"
-              priority
+              className="h-10 w-10 rounded-full bg-white object-contain"
             />
-
             <span
               className={cn(
                 "font-serif text-xl font-semibold tracking-wide transition-colors duration-300 lg:text-2xl",
                 isScrolled ? "text-foreground" : "text-primary-foreground",
               )}
             >
-              VaanPhotography
+              {siteName}
             </span>
           </Link>
 
@@ -79,7 +77,7 @@ export function Navbar() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "relative text-sm font-medium tracking-wide uppercase transition-colors duration-300",
+                  "relative text-sm font-medium uppercase tracking-wide transition-colors duration-300",
                   isScrolled
                     ? pathname === link.href
                       ? "text-foreground"
@@ -110,11 +108,7 @@ export function Navbar() {
                 )}
                 aria-label="Changer de theme"
               >
-                {theme === "dark" ? (
-                  <Sun className="h-4 w-4" />
-                ) : (
-                  <Moon className="h-4 w-4" />
-                )}
+                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </button>
             )}
           </div>
@@ -125,17 +119,11 @@ export function Navbar() {
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                 className={cn(
                   "rounded-full p-2 transition-colors",
-                  isScrolled
-                    ? "text-muted-foreground"
-                    : "text-primary-foreground/70",
+                  isScrolled ? "text-muted-foreground" : "text-primary-foreground/70",
                 )}
                 aria-label="Changer de theme"
               >
-                {theme === "dark" ? (
-                  <Sun className="h-4 w-4" />
-                ) : (
-                  <Moon className="h-4 w-4" />
-                )}
+                {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </button>
             )}
             <button
@@ -146,11 +134,7 @@ export function Navbar() {
               )}
               aria-label="Ouvrir le menu"
             >
-              {isMobileOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
+              {isMobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </nav>
@@ -197,5 +181,5 @@ export function Navbar() {
         )}
       </AnimatePresence>
     </>
-  );
+  )
 }

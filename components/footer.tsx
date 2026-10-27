@@ -14,14 +14,23 @@ export function Footer({ settings, services }: FooterProps) {
     <footer className="border-t border-border bg-card">
       <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
-          
+
           {/* Logo + description */}
           <div className="lg:col-span-1">
             <Link
               href="/"
-              className="font-serif text-2xl font-semibold tracking-wide text-foreground"
+              className="flex items-center gap-3"
             >
-              {settings?.siteName || "Alexandre Dupont"}
+              {settings?.logo && (
+                <img
+                  src={settings.logo}
+                  alt={settings?.siteName || "Logo"}
+                  className="h-10 w-10 shrink-0 object-contain"
+                />
+              )}
+              <span className="font-serif text-2xl font-semibold tracking-wide text-foreground">
+                {settings?.siteName || "Alexandre Dupont"}
+              </span>
             </Link>
 
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
@@ -74,11 +83,11 @@ export function Footer({ settings, services }: FooterProps) {
             <h3 className="font-serif text-lg font-semibold text-foreground">Navigation</h3>
             <ul className="mt-4 flex flex-col gap-3">
               {[
-                { href: "/", label: "Accueil" },
+                { href: "/",          label: "Accueil"   },
                 { href: "/portfolio", label: "Portfolio" },
-                { href: "/about", label: "À propos" },
-                { href: "/services", label: "Services" },
-                { href: "/contact", label: "Contact" },
+                { href: "/about",     label: "À propos"  },
+                { href: "/services",  label: "Services"  },
+                { href: "/contact",   label: "Contact"   },
               ].map((link) => (
                 <li key={link.href}>
                   <Link
@@ -122,18 +131,24 @@ export function Footer({ settings, services }: FooterProps) {
               {settings?.contactEmail && (
                 <li className="flex items-start gap-3">
                   <Mail className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
-                  <span className="text-sm text-muted-foreground">
+                  <a
+                    href={`mailto:${settings.contactEmail}`}
+                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  >
                     {settings.contactEmail}
-                  </span>
+                  </a>
                 </li>
               )}
 
               {settings?.contactPhone && (
                 <li className="flex items-start gap-3">
                   <Phone className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
-                  <span className="text-sm text-muted-foreground">
+                  <a
+                    href={`tel:${settings.contactPhone.replace(/\s/g, "")}`}
+                    className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  >
                     {settings.contactPhone}
-                  </span>
+                  </a>
                 </li>
               )}
 

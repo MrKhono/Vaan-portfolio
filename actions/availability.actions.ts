@@ -119,3 +119,53 @@ export async function copyToWeekAction(
     return { success: false, error: "Erreur serveur" }
   }
 }
+
+export async function copyToDayOfMonthAction(
+  date: string,
+  slots: TimeSlot[]
+): Promise<{ success: boolean; error?: string; count?: number }> {
+  try {
+    await requireAuth()
+
+    const sourceDate  = new Date(date)
+    const dayOfWeek   = sourceDate.getDay() // 0 = dimanche, 1 = lundi, etc.
+    const year        = sourceDate.getFullYear()
+    const month       = sourceDate.getMonth()
+
+    // Calcul de tous les jours du mois correspondant au même jour de la semaine
+    const targetDates: string[] = []
+    const lastDay = new Date(year, month + 1, 0).getDate()
+
+    for (let day = 1; day <= lastDay; day++) {
+      const current = new Date(year, month, day)
+      if (current.getDay() === dayOfWeek) {
+        const dateStr = current.toISOString().split("T")[0]
+        // On exclut les dates passées
+        const today = new Date().toISOString().split("T")[0]
+        if (dateStr >= today) {
+          targetDates.push(dateStr)
+        }
+      }
+    }
+
+    // Upsert pour chaque date trouvée
+    for (const targetDate of targetDates) {
+      if (slots.length === 0) {
+        await prisma.availability.deleteMany({ where: { date: targetDate } })
+      } else {
+        await prisma.availability.upsert({
+          where:  { date: targetDate },
+          update: { slots },
+          create: { date: targetDate, slots },
+        })
+      }
+    }
+
+    revalidatePath("/rendez-vous")
+    return { success: true, count: targetDates.length }
+  } catch (e: unknown) {
+    if (e instanceof Error && e.message === "Non autorisé")
+      return { success: false, error: "Non autorisé" }
+    return { success: false, error: "Erreur serveur" }
+  }
+}

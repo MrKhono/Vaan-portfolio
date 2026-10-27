@@ -10,6 +10,7 @@ import { getSettingsAction } from "@/actions/settings.actions"
 import ConditionalLayout from "@/components/conditionalLyaout"
 import { getServicesAction } from "@/actions/service.actions"
 
+
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -18,6 +19,7 @@ const playfair = Playfair_Display({
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettingsAction()
+  const logoUrl  = settings.logo || "/sno.png"
 
   return {
     title: {
@@ -27,9 +29,9 @@ export async function generateMetadata(): Promise<Metadata> {
     description: settings.siteDescription || "Photographe professionnel spécialisé en mariage, portrait, mode et événementiel.",
     keywords: ["photographe", "mariage", "portrait", "mode", "événementiel", "professionnel"],
     icons: {
-      icon:     [{ url: "/sno.png", type: "image/png" }],
-      apple:    [{ url: "/sno.png", sizes: "180x180", type: "image/png" }],
-      shortcut:  "/sno.png",
+      icon:     [{ url: logoUrl }],
+      apple:    [{ url: logoUrl, sizes: "180x180" }],
+      shortcut:  logoUrl,
     },
   }
 }
@@ -48,17 +50,18 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  // const settings = await getSettingsAction()
   const [settings, services] = await Promise.all([
     getSettingsAction(),
     getServicesAction(),
   ])
 
+  const logoUrl = settings.logo || "/sno.png"
+
   return (
     <html lang="fr" suppressHydrationWarning>
       <head>
-        <link rel="icon"             href="/sno.png" type="image/png" />
-        <link rel="apple-touch-icon" href="/sno.png" />
+        <link rel="icon"             href={logoUrl} />
+        <link rel="apple-touch-icon" href={logoUrl} />
       </head>
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
         <ThemeProvider
@@ -68,8 +71,8 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <ConditionalLayout
-            navbar={<Navbar />}
-             footer={<Footer settings={settings} services={services}  />}
+            navbar={<Navbar settings={settings} />}
+            footer={<Footer settings={settings} services={services} />}
           >
             <main>
               {children}

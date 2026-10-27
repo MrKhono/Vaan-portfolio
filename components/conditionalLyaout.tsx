@@ -34,6 +34,10 @@ export default function ConditionalLayout({
     "/admin/testimonials",
     "/admin/about",
     "/admin/admins",
+    "/admin/forgot-password",
+    "admin/reset-password",
+    "/admin/home-gallery",
+    "/admin/branding",
   ]
 
   const hideLayout = noLayoutPages.includes(pathname)

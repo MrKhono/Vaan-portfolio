@@ -7,29 +7,32 @@ import {
   getAvailabilityForDateAction,
   saveAvailabilityAction,
   copyToWeekAction,
+  copyToDayOfMonthAction,
   type Availability,
   type TimeSlot,
 } from "@/actions/availability.actions"
 import { useToast } from "@/hooks/use-toast"
-import { AvailabilityCalendar } from "./availability-calendar"
-import { AvailabilityCopyDialog } from "./availability-copy-dialog"
-import { AvailabilitySidebar } from "./availability-sidebar"
-import { AvailabilitySlotsDialog } from "./availability-slots-dialog"
-import { formatDateLocal } from "@/lib/utils"
+import { AvailabilityCalendar }        from "./availability-calendar"
+import { AvailabilitySidebar }         from "./availability-sidebar"
+import { AvailabilitySlotsDialog }     from "./availability-slots-dialog"
+import { AvailabilityCopyDialog }      from "./availability-copy-dialog"
+import { AvailabilityCopyMonthDialog } from "./availability-copy-month-dialog"
 
 export default function AvailabilityPage() {
-  const [availabilities, setAvailabilities] = useState<Availability[]>([])
-  const [currentMonth, setCurrentMonth]     = useState(new Date())
-  const [selectedDate, setSelectedDate]     = useState<string | null>(null)
-  const [isDialogOpen, setIsDialogOpen]     = useState(false)
-  const [copyDialogOpen, setCopyDialogOpen] = useState(false)
-  const [slots, setSlots]                   = useState<TimeSlot[]>([])
-  const [newSlot, setNewSlot]               = useState<TimeSlot>({ start: "09:00", end: "10:00" })
-  const [isSaving, setIsSaving]             = useState(false)
-  const [isCopying, setIsCopying]           = useState(false)
+  const [availabilities, setAvailabilities]     = useState<Availability[]>([])
+  const [currentMonth, setCurrentMonth]         = useState(new Date())
+  const [selectedDate, setSelectedDate]         = useState<string | null>(null)
+  const [isDialogOpen, setIsDialogOpen]         = useState(false)
+  const [copyDialogOpen, setCopyDialogOpen]     = useState(false)
+  const [copyMonthDialogOpen, setCopyMonthDialogOpen] = useState(false)
+  const [slots, setSlots]                       = useState<TimeSlot[]>([])
+  const [newSlot, setNewSlot]                   = useState<TimeSlot>({ start: "09:00", end: "10:00" })
+  const [isSaving, setIsSaving]                 = useState(false)
+  const [isCopying, setIsCopying]               = useState(false)
+  const [isCopyingMonth, setIsCopyingMonth]     = useState(false)
   const { toast } = useToast()
 
-  const today = formatDateLocal(new Date())
+  const today = new Date().toISOString().split("T")[0]
 
   async function loadAvailabilities() {
     const data = await getAvailabilitiesAction()
@@ -39,7 +42,7 @@ export default function AvailabilityPage() {
   useEffect(() => { loadAvailabilities() }, [])
 
   async function handleDateClick(date: Date) {
-    const dateStr  = formatDateLocal(date)
+    const dateStr  = date.toISOString().split("T")[0]
     const existing = await getAvailabilityForDateAction(dateStr)
     setSelectedDate(dateStr)
     setSlots(existing?.slots || [])
@@ -99,6 +102,26 @@ export default function AvailabilityPage() {
     setIsCopying(false)
   }
 
+  async function handleCopyToMonth() {
+    if (!selectedDate) return
+    setIsCopyingMonth(true)
+
+    const result = await copyToDayOfMonthAction(selectedDate, slots)
+
+    if (result.success) {
+      toast({
+        title: "Créneaux appliqués",
+        description: `Les créneaux ont été appliqués à ${result.count} date${result.count! > 1 ? "s" : ""} du mois.`,
+      })
+      await loadAvailabilities()
+      setCopyMonthDialogOpen(false)
+    } else {
+      toast({ title: "Erreur", description: result.error, variant: "destructive" })
+    }
+
+    setIsCopyingMonth(false)
+  }
+
   return (
     <AdminShell
       title="Disponibilités"
@@ -129,6 +152,7 @@ export default function AvailabilityPage() {
         onRemoveSlot={(i) => setSlots(slots.filter((_, idx) => idx !== i))}
         onSave={handleSave}
         onCopyWeek={() => setCopyDialogOpen(true)}
+        onCopyMonth={() => setCopyMonthDialogOpen(true)}
       />
 
       <AvailabilityCopyDialog
@@ -136,6 +160,14 @@ export default function AvailabilityPage() {
         isCopying={isCopying}
         onOpenChange={setCopyDialogOpen}
         onConfirm={handleCopyToWeek}
+      />
+
+      <AvailabilityCopyMonthDialog
+        open={copyMonthDialogOpen}
+        isCopying={isCopyingMonth}
+        selectedDate={selectedDate}
+        onOpenChange={setCopyMonthDialogOpen}
+        onConfirm={handleCopyToMonth}
       />
     </AdminShell>
   )

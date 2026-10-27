@@ -1,14 +1,11 @@
 import Link from "next/link"
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/motion"
-import { getProjectsAction } from "@/actions/project.actions"
-
-export const dynamic = "force-dynamic"
+import { getHomeGalleryPhotosAction } from "@/actions/home-gallery.actions"
 
 export async function GalleryPreview() {
-  const allProjects     = await getProjectsAction()
-  const previewProjects = allProjects.slice(0, 6)
+  const photos = await getHomeGalleryPhotosAction()
 
-  if (previewProjects.length === 0) return null
+  if (photos.length === 0) return null
 
   return (
     <section className="bg-secondary/30 px-6 py-24 lg:px-8 lg:py-32">
@@ -23,10 +20,10 @@ export async function GalleryPreview() {
         </FadeIn>
 
         <StaggerContainer className="columns-1 gap-6 sm:columns-2 lg:columns-3">
-          {previewProjects.map((project, i) => (
-            <StaggerItem key={project.id} className="mb-6 break-inside-avoid">
+          {photos.map((photo, i) => (
+            <StaggerItem key={photo.id} className="mb-6 break-inside-avoid">
               <Link
-                href={`/portfolio/${project.id}`}
+                href="/portfolio"
                 className="group relative block overflow-hidden rounded-xl"
               >
                 <div
@@ -37,21 +34,27 @@ export async function GalleryPreview() {
                   }
                 >
                   <img
-                    src={project.coverImage || "/images/placeholder.jpg"}
-                    alt={project.title}
+                    src={photo.image}
+                    alt={photo.title || `Photo ${i + 1}`}
                     className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                 </div>
-                <div className="absolute inset-0 flex items-end bg-linear-to-t from-[#0F0F0F]/70 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-                  <div className="p-6">
-                    <p className="text-xs font-medium uppercase tracking-wider text-[#D6C6B8]">
-                      {project.domain.name}
-                    </p>
-                    <h3 className="mt-1 font-serif text-xl font-semibold text-[#F8F8F8]">
-                      {project.title}
-                    </h3>
+                {(photo.title || photo.category) && (
+                  <div className="absolute inset-0 flex items-end bg-linear-to-t from-[#0F0F0F]/70 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+                    <div className="p-6">
+                      {photo.category && (
+                        <p className="text-xs font-medium uppercase tracking-wider text-[#D6C6B8]">
+                          {photo.category}
+                        </p>
+                      )}
+                      {photo.title && (
+                        <h3 className="mt-1 font-serif text-xl font-semibold text-[#F8F8F8]">
+                          {photo.title}
+                        </h3>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </Link>
             </StaggerItem>
           ))}
