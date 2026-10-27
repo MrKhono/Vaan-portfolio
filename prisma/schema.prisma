@@ -205,6 +205,7 @@ model Project {
   title       String
   description String?
   coverImage  String   @default("")
+  coverPosition String  @default("50% 50%")
   images      String[]
   date        String   @default("")
   location    String   @default("")

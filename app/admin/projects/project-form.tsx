@@ -8,6 +8,7 @@ import {
   SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { ImageUpload, MultiImageUpload } from "@/components/admin/image-upload"
+import { ImagePositionPicker } from "@/components/admin/image-position-picker"
 import Link from "next/link"
 import { ProjectData } from "@/actions/project.actions"
 import { Domain } from "@/actions/domain.actions"
@@ -29,6 +30,15 @@ export function ProjectForm({ formData, onChange, domains }: ProjectFormProps) {
         ? formData.coverImage
         : newImages[0] ?? ""
     onChange({ ...formData, images: newImages, coverImage })
+  }
+
+  function handleCoverChange(value: string) {
+    // Réinitialise la position quand on change de cover
+    onChange({
+      ...formData,
+      coverImage:    value,
+      coverPosition: value !== formData.coverImage ? "50% 50%" : formData.coverPosition,
+    })
   }
 
   return (
@@ -138,10 +148,20 @@ export function ProjectForm({ formData, onChange, domains }: ProjectFormProps) {
       <ImageUpload
         label="Image de couverture"
         value={formData.coverImage}
-        onChange={(value) => set("coverImage", value)}
+        onChange={handleCoverChange}
         aspectRatio="video"
         description="L'image principale qui représente le projet"
       />
+
+      {/* Positionnement du point focal — n'apparaît qu'une fois la cover ajoutée */}
+      {formData.coverImage && (
+        <ImagePositionPicker
+          image={formData.coverImage}
+          value={formData.coverPosition || "50% 50%"}
+          onChange={(coverPosition) => set("coverPosition", coverPosition)}
+          label="Point focal de l'image de couverture"
+        />
+      )}
 
       {/* Photos du projet */}
       <MultiImageUpload

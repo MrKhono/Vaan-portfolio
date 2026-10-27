@@ -6,16 +6,17 @@ import { auth } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 
 export type ProjectData = {
-  title:       string
-  description: string
-  coverImage:  string
-  images:      string[]
-  date:        string
-  location:    string
-  client:      string
-  camera:      string
-  lens:        string
-  domainId:    string
+  title:         string
+  description:   string
+  coverImage:    string
+  coverPosition: string
+  images:        string[]
+  date:          string
+  location:      string
+  client:        string
+  camera:        string
+  lens:          string
+  domainId:      string
 }
 
 export type Project = ProjectData & {
@@ -38,7 +39,8 @@ export async function getProjectsAction(): Promise<Project[]> {
 
   return projects.map((p) => ({
     ...p,
-    description: p.description ?? "",
+    description:   p.description   ?? "",
+    coverPosition: p.coverPosition ?? "50% 50%",
   }))
 }
 
@@ -53,16 +55,17 @@ export async function createProjectAction(
 
     await prisma.project.create({
       data: {
-        title:       data.title,
-        description: data.description || null,
-        coverImage:  data.coverImage,
-        images:      data.images,
-        date:        data.date,
-        location:    data.location,
-        client:      data.client,
-        camera:      data.camera,
-        lens:        data.lens,
-        domainId:    data.domainId,
+        title:         data.title,
+        description:   data.description || null,
+        coverImage:    data.coverImage,
+        coverPosition: data.coverPosition || "50% 50%",
+        images:        data.images,
+        date:          data.date,
+        location:      data.location,
+        client:        data.client,
+        camera:        data.camera,
+        lens:          data.lens,
+        domainId:      data.domainId,
       },
     })
 
@@ -71,6 +74,7 @@ export async function createProjectAction(
     revalidatePath("/admin/projets")
     return { success: true }
   } catch (e: unknown) {
+    console.error("createProjectAction error:", e)
     if (e instanceof Error && e.message === "Non autorisé")
       return { success: false, error: "Non autorisé" }
     return { success: false, error: "Erreur serveur" }
@@ -90,16 +94,17 @@ export async function updateProjectAction(
     await prisma.project.update({
       where: { id },
       data: {
-        title:       data.title,
-        description: data.description || null,
-        coverImage:  data.coverImage,
-        images:      data.images,
-        date:        data.date,
-        location:    data.location,
-        client:      data.client,
-        camera:      data.camera,
-        lens:        data.lens,
-        domainId:    data.domainId,
+        title:         data.title,
+        description:   data.description || null,
+        coverImage:    data.coverImage,
+        coverPosition: data.coverPosition || "50% 50%",
+        images:        data.images,
+        date:          data.date,
+        location:      data.location,
+        client:        data.client,
+        camera:        data.camera,
+        lens:          data.lens,
+        domainId:      data.domainId,
       },
     })
 
@@ -109,6 +114,7 @@ export async function updateProjectAction(
     revalidatePath("/admin/projets")
     return { success: true }
   } catch (e: unknown) {
+    console.error("updateProjectAction error:", e)
     if (e instanceof Error && e.message === "Non autorisé")
       return { success: false, error: "Non autorisé" }
     return { success: false, error: "Erreur serveur" }

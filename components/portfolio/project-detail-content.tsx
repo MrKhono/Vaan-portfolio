@@ -33,6 +33,7 @@ export function ProjectDetailContent({
           src={project.coverImage || "/images/placeholder.jpg"}
           alt={project.title}
           className="h-full w-full object-cover"
+          style={{ objectPosition: project.coverPosition || "50% 50%" }}
         />
         <div className="absolute inset-0 bg-linear-to-t from-[#0F0F0F]/80 via-[#0F0F0F]/20 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 px-6 pb-16 lg:px-8">
