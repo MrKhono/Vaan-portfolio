@@ -13,8 +13,8 @@ export async function sendResetPasswordEmail({
   name,
   url,
 }: SendResetPasswordEmailParams) {
-  const { data, error } = await resend.emails.send({
-    from:    "Vaan Photography <onboarding@resend.dev>",
+  const { data: resendData, error } = await resend.emails.send({
+    from:    "Vaan Photography <no-reply@vaanphotography.fr>",
     to:      [to],
     subject: "Réinitialisation de votre mot de passe",
     html:    buildResetEmailHtml({ name, url }),
@@ -25,7 +25,7 @@ export async function sendResetPasswordEmail({
     throw new Error("Impossible d'envoyer l'email de réinitialisation")
   }
 
-  return data
+  return resendData
 }
 
 function buildResetEmailHtml({ name, url }: { name: string; url: string }): string {
