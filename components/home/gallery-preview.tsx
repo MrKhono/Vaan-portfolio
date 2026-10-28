@@ -19,20 +19,14 @@ export async function GalleryPreview() {
           </h2>
         </FadeIn>
 
-        <StaggerContainer className="columns-1 gap-6 sm:columns-2 lg:columns-3">
+        <StaggerContainer className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {photos.map((photo, i) => (
-            <StaggerItem key={photo.id} className="mb-6 break-inside-avoid">
+            <StaggerItem key={photo.id}>
               <Link
                 href="/portfolio"
                 className="group relative block overflow-hidden rounded-xl"
               >
-                <div
-                  className={
-                    i % 3 === 0 ? "aspect-3/4" :
-                    i % 3 === 1 ? "aspect-square" :
-                    "aspect-4/3"
-                  }
-                >
+                <div className="aspect-square">
                   <img
                     src={photo.image}
                     alt={photo.title || `Photo ${i + 1}`}
