@@ -117,6 +117,8 @@ model SiteSettings {
   facebook       String   @default("")
   twitter        String   @default("")
   linkedin       String   @default("")
+  googleReviewsUrl     String  @default("")
+  googleReviewsEnabled Boolean @default(false)
 
   @@map("site_settings")
 }

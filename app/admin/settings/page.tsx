@@ -1,85 +1,75 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
-import { AdminShell } from "@/components/admin/admin-shell";
+import { useEffect, useState } from "react"
+import { AdminShell } from "@/components/admin/admin-shell"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+  Card, CardContent, CardDescription, CardHeader, CardTitle,
+} from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
 import {
-  Save,
-  Loader2,
-  Globe,
-  Mail,
-  Phone,
-  MapPin,
-  Instagram,
-  Facebook,
-  Linkedin,
-  Twitter,
-} from "lucide-react";
+  Save, Loader2, Globe, Mail, Phone, MapPin,
+  Instagram, Facebook, Linkedin, Twitter, Star,
+} from "lucide-react"
 import {
   getSettingsAction,
   SiteSettings,
   updateSettingsAction,
-} from "@/actions/settings.actions";
-import { toast } from "sonner";
+} from "@/actions/settings.actions"
+import { toast } from "sonner"
 
 const defaultSettings: SiteSettings = {
-  siteName: "",
-  siteDescription: "",
-  contactEmail: "",
-  contactPhone: "",
-  address: "",
+  siteName:             "",
+  siteDescription:      "",
+  logo:                 "",
+  contactEmail:         "",
+  contactPhone:         "",
+  address:              "",
+  googleReviewsUrl:     "",
+  googleReviewsEnabled: false,
   socialLinks: {
     instagram: "",
-    facebook: "",
-    twitter: "",
-    linkedin: "",
+    facebook:  "",
+    twitter:   "",
+    linkedin:  "",
   },
-};
+}
 
 export default function AdminSettingsPage() {
-  const [settings, setSettingsState] = useState<SiteSettings>(defaultSettings);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  const [settings, setSettingsState] = useState<SiteSettings>(defaultSettings)
+  const [isLoading, setIsLoading]    = useState(true)
+  const [isSaving, setIsSaving]      = useState(false)
 
   useEffect(() => {
     async function load() {
       try {
-        const data = await getSettingsAction();
-        setSettingsState(data);
+        const data = await getSettingsAction()
+        setSettingsState(data)
       } catch {
-        toast.error("Impossible de charger les paramètres");
+        toast.error("Impossible de charger les paramètres")
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
-    load();
-  }, [toast]);
+    load()
+  }, [])
 
   const handleSave = async () => {
-    if (!settings) return;
-    setIsSaving(true);
-
-    // const result = await updateSettingsAction(settings);
+    if (!settings) return
+    setIsSaving(true)
 
     try {
-      const result = await updateSettingsAction(settings);
-      toast.success("Les paramètres du site ont été mis à jour.");
-    }catch {
+      await updateSettingsAction(settings)
+      toast.success("Les paramètres du site ont été mis à jour.")
+    } catch {
       toast.error("Impossible d'enregistrer les paramètres.")
     }
 
-    setIsSaving(false);
-  };
+    setIsSaving(false)
+  }
 
   if (isLoading) {
     return (
@@ -91,7 +81,7 @@ export default function AdminSettingsPage() {
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       </AdminShell>
-    );
+    )
   }
 
   return (
@@ -115,6 +105,7 @@ export default function AdminSettingsPage() {
       }
     >
       <div className="grid gap-6 lg:grid-cols-2">
+
         {/* Informations générales */}
         <Card>
           <CardHeader>
@@ -153,8 +144,7 @@ export default function AdminSettingsPage() {
                 rows={3}
               />
               <p className="text-xs text-muted-foreground">
-                Cette description apparaît dans les résultats de recherche
-                Google.
+                Cette description apparaît dans les résultats de recherche Google.
               </p>
             </div>
           </CardContent>
@@ -219,6 +209,59 @@ export default function AdminSettingsPage() {
                 placeholder="12 Rue de la Roquette, 75011 Paris"
                 rows={2}
               />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Avis Google */}
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Star className="h-5 w-5 text-accent" />
+                  Avis Google
+                </CardTitle>
+                <CardDescription>
+                  Affichez un bouton sous vos témoignages invitant vos clients à laisser un avis sur Google.
+                </CardDescription>
+              </div>
+              <Switch
+                checked={settings.googleReviewsEnabled}
+                onCheckedChange={(checked) =>
+                  setSettingsState({ ...settings, googleReviewsEnabled: checked })
+                }
+              />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Label htmlFor="googleReviewsUrl">URL Google Reviews</Label>
+              <Input
+                id="googleReviewsUrl"
+                type="url"
+                value={settings.googleReviewsUrl}
+                onChange={(e) =>
+                  setSettingsState({
+                    ...settings,
+                    googleReviewsUrl: e.target.value,
+                  })
+                }
+                placeholder="https://g.page/r/..."
+                disabled={!settings.googleReviewsEnabled}
+              />
+              <p className="text-xs text-muted-foreground">
+                Trouvez votre lien sur{" "}
+                <a
+                  href="https://business.google.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
+                  Google Business Profile
+                </a>{" "}
+                → Clients → Avis → Obtenir plus d&apos;avis → Partager le formulaire.
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -318,18 +361,15 @@ export default function AdminSettingsPage() {
         </Card>
 
         {/* Note informative */}
-        <Card className="lg:col-span-2 bg-muted/50">
+        <Card className="bg-muted/50 lg:col-span-2">
           <CardContent className="p-6">
-            <h3 className="font-semibold mb-2">À propos des paramètres</h3>
+            <h3 className="mb-2 font-semibold">À propos des paramètres</h3>
             <p className="text-sm text-muted-foreground">
-              Ces paramètres sont utilisés dans plusieurs endroits du site : le
-              pied de page, la page de contact, les méta-données SEO et les
-              liens vers vos réseaux sociaux. Assurez-vous de les maintenir à
-              jour pour une meilleure visibilité.
+              Ces paramètres sont utilisés dans plusieurs endroits du site : le pied de page, la page de contact, les méta-données SEO, les liens vers vos réseaux sociaux et le bouton d&apos;avis Google sous les témoignages. Assurez-vous de les maintenir à jour pour une meilleure visibilité.
             </p>
           </CardContent>
         </Card>
       </div>
     </AdminShell>
-  );
+  )
 }

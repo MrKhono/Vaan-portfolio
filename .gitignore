@@ -11,4 +11,7 @@ node_modules/
 /lib/generated/prisma
 
 # prisma 
-/lib/generated/
+/lib/generated/.env
+
+.env
+.env.local

@@ -7,12 +7,14 @@ import { revalidatePath } from "next/cache"
 
 // Type qui correspond exactement à la structure du composant
 export type SiteSettings = {
-  siteName:        string
-  siteDescription: string
-  logo:            string
-  contactEmail:    string
-  contactPhone:    string
-  address:         string
+  siteName:             string
+  siteDescription:      string
+  logo:                 string
+  contactEmail:         string
+  contactPhone:         string
+  address:              string
+  googleReviewsUrl:     string
+  googleReviewsEnabled: boolean
   socialLinks: {
     instagram: string
     facebook:  string
@@ -25,12 +27,14 @@ export async function getSettingsAction(): Promise<SiteSettings> {
   const s = await prisma.siteSettings.findFirst()
 
   return {
-    siteName:        s?.siteName       ?? "",
-    siteDescription: s?.seoDescription ?? "",
-    logo:            s?.logo           ?? "",
-    contactEmail:    s?.email          ?? "",
-    contactPhone:    s?.phone          ?? "",
-    address:         s?.address        ?? "",
+    siteName:             s?.siteName             ?? "",
+    siteDescription:      s?.seoDescription       ?? "",
+    logo:                 s?.logo                 ?? "",
+    contactEmail:         s?.email                ?? "",
+    contactPhone:         s?.phone                ?? "",
+    address:              s?.address              ?? "",
+    googleReviewsUrl:     s?.googleReviewsUrl     ?? "",
+    googleReviewsEnabled: s?.googleReviewsEnabled ?? false,
     socialLinks: {
       instagram: s?.instagram ?? "",
       facebook:  s?.facebook  ?? "",
@@ -56,16 +60,18 @@ export async function updateSettingsAction(
 
     // On aplatit le type du composant vers le schéma Prisma
     const payload = {
-      siteName:       data.siteName,
-      seoDescription: data.siteDescription,
-      logo:           data.logo,
-      email:          data.contactEmail,
-      phone:          data.contactPhone,
-      address:        data.address,
-      instagram:      data.socialLinks.instagram,
-      facebook:       data.socialLinks.facebook,
-      twitter:        data.socialLinks.twitter,
-      linkedin:       data.socialLinks.linkedin,
+      siteName:             data.siteName,
+      seoDescription:       data.siteDescription,
+      logo:                 data.logo,
+      email:                data.contactEmail,
+      phone:                data.contactPhone,
+      address:              data.address,
+      googleReviewsUrl:     data.googleReviewsUrl,
+      googleReviewsEnabled: data.googleReviewsEnabled,
+      instagram:            data.socialLinks.instagram,
+      facebook:             data.socialLinks.facebook,
+      twitter:              data.socialLinks.twitter,
+      linkedin:             data.socialLinks.linkedin,
     }
 
     if (existing) {
@@ -78,10 +84,11 @@ export async function updateSettingsAction(
     }
 
     revalidatePath("/", "layout")
-    revalidatePath("/admin",         "layout")
+    revalidatePath("/admin", "layout")
 
     return { success: true }
-  } catch {
+  } catch (error) {
+    console.error("updateSettingsAction error:", error)
     return { success: false, error: "Erreur serveur, réessayez." }
   }
 }
