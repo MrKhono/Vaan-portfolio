@@ -13,11 +13,9 @@ import {
   CalendarCheck, Check, X, MoreHorizontal,
   Eye, Trash2,
 } from "lucide-react"
-import { cn, parseDateLocal } from "@/lib/utils"
+import { cn, parseDateLocal, formatDate, formatDateTime } from "@/lib/utils"
 import { STATUS_CONFIG } from "@/lib/status-config"
 import type { Appointment } from "@/actions/appointment.actions"
-
-
 
 interface AppointmentsTableProps {
   appointments:    Appointment[]
@@ -36,11 +34,6 @@ export function AppointmentsTable({
   onCancel,
   onDelete,
 }: AppointmentsTableProps) {
-  const formatDate = (d: string) =>
-    parseDateLocal(d).toLocaleDateString("fr-FR", {
-      weekday: "short", day: "numeric", month: "short", year: "numeric",
-    })
-
   if (appointments.length === 0) {
     return (
       <Card>
@@ -78,7 +71,7 @@ export function AppointmentsTable({
                       <p className="text-sm text-muted-foreground">{appointment.clientEmail}</p>
                     </TableCell>
                     <TableCell>
-                      <p className="font-medium">{formatDate(appointment.date)}</p>
+                      <p className="font-medium">{formatDate(parseDateLocal(appointment.date))}</p>
                       <p className="text-sm text-muted-foreground">
                         {appointment.slotStart} - {appointment.slotEnd}
                       </p>
@@ -94,7 +87,7 @@ export function AppointmentsTable({
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {formatDate(appointment.createdAt.toString())}
+                      {formatDateTime(appointment.createdAt)}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>

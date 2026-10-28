@@ -8,6 +8,7 @@ import {
   SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { Clock, Copy, CalendarRange, Loader2, Plus, Trash2 } from "lucide-react"
+import { formatDate, parseDateLocal } from "@/lib/utils"
 import type { TimeSlot } from "@/actions/availability.actions"
 
 const TIME_OPTIONS = [
@@ -17,18 +18,18 @@ const TIME_OPTIONS = [
 ]
 
 interface AvailabilitySlotsDialogProps {
-  open:         boolean
-  selectedDate: string | null
-  slots:        TimeSlot[]
-  newSlot:      TimeSlot
-  isSaving:     boolean
-  onOpenChange: (open: boolean) => void
+  open:            boolean
+  selectedDate:    string | null
+  slots:           TimeSlot[]
+  newSlot:         TimeSlot
+  isSaving:        boolean
+  onOpenChange:    (open: boolean) => void
   onNewSlotChange: (slot: TimeSlot) => void
-  onAddSlot:    () => void
-  onRemoveSlot: (index: number) => void
-  onSave:       () => void
-  onCopyWeek:   () => void
-  onCopyMonth:  () => void   // ← nouveau prop
+  onAddSlot:       () => void
+  onRemoveSlot:    (index: number) => void
+  onSave:          () => void
+  onCopyWeek:      () => void
+  onCopyMonth:     () => void
 }
 
 export function AvailabilitySlotsDialog({
@@ -46,9 +47,7 @@ export function AvailabilitySlotsDialog({
   onCopyMonth,
 }: AvailabilitySlotsDialogProps) {
   const dateLabel = selectedDate
-    ? new Date(selectedDate).toLocaleDateString("fr-FR", {
-        weekday: "long", day: "numeric", month: "long", year: "numeric",
-      })
+    ? formatDate(parseDateLocal(selectedDate))
     : ""
 
   return (

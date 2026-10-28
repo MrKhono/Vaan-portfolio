@@ -3,6 +3,7 @@ import {
   AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { formatMonth, parseDateLocal } from "@/lib/utils"
 
 const DAYS_OF_WEEK_FULL = [
   "dimanches", "lundis", "mardis", "mercredis",
@@ -24,13 +25,10 @@ export function AvailabilityCopyMonthDialog({
   onOpenChange,
   onConfirm,
 }: AvailabilityCopyMonthDialogProps) {
-  const dayName = selectedDate
-    ? DAYS_OF_WEEK_FULL[new Date(selectedDate).getDay()]
-    : ""
+  const parsedDate = selectedDate ? parseDateLocal(selectedDate) : null
 
-  const monthName = selectedDate
-    ? new Date(selectedDate).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })
-    : ""
+  const dayName   = parsedDate ? DAYS_OF_WEEK_FULL[parsedDate.getDay()] : ""
+  const monthName = parsedDate ? formatMonth(parsedDate)                : ""
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>

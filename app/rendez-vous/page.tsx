@@ -25,20 +25,26 @@ import { createAppointmentAction } from "@/actions/appointment.actions"
 import { getServicesAction } from "@/actions/service.actions"
 import { getSettingsAction } from "@/actions/settings.actions"
 import { FadeIn } from "@/components/motion"
-import { cn, formatDateLocal, parseDateLocal } from "@/lib/utils"
+import {
+  cn,
+  formatDateLocal,
+  parseDateLocal,
+  toParisDateString,
+  formatDate,
+} from "@/lib/utils"
 import Link from "next/link"
 
 const DAYS_OF_WEEK = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"]
 const MONTHS = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"]
 
-type BookingStep = "date" | "time" | "details" | "confirmation";
+type BookingStep = "date" | "time" | "details" | "confirmation"
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic"
 
 export default function BookingPage() {
-  const [currentMonth, setCurrentMonth] = useState(new Date())
-  const [selectedDate, setSelectedDate] = useState<string | null>(null)
-  const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null)
+  const [currentMonth, setCurrentMonth]     = useState(new Date())
+  const [selectedDate, setSelectedDate]     = useState<string | null>(null)
+  const [selectedSlot, setSelectedSlot]     = useState<TimeSlot | null>(null)
   const [availableDates, setAvailableDates] = useState<string[]>([])
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([])
   const [services, setServices]             = useState<{ id: string; title: string }[]>([])
@@ -57,7 +63,7 @@ export default function BookingPage() {
         getServicesAction(),
         getSettingsAction(),
       ])
-      const today = formatDateLocal(new Date())
+      const today = toParisDateString()
       setAvailableDates(avs.filter((a) => a.date >= today && a.slots.length > 0).map((a) => a.date))
       setServices(svcs)
       setAddress(settings.address)
@@ -69,8 +75,6 @@ export default function BookingPage() {
     if (!selectedDate) return
     getAvailableSlotsForDateAction(selectedDate).then(setAvailableSlots)
   }, [selectedDate])
-
-  const formatDate = (d: Date) => formatDateLocal(d)
 
   const calendarDays = useMemo(() => {
     const year  = currentMonth.getFullYear()
@@ -88,14 +92,14 @@ export default function BookingPage() {
     return days
   }, [currentMonth])
 
-  const today = formatDate(new Date())
+  const today = toParisDateString()
 
   const selectedDateFormatted = selectedDate
-    ? parseDateLocal(selectedDate).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
+    ? formatDate(parseDateLocal(selectedDate))
     : ""
 
   const handleDateSelect = (date: Date) => {
-    const dateStr = formatDate(date)
+    const dateStr = formatDateLocal(date)
     if (!availableDates.includes(dateStr)) return
     setSelectedDate(dateStr)
     setSelectedSlot(null)
@@ -217,7 +221,7 @@ export default function BookingPage() {
                     </div>
                     <div className="grid grid-cols-7 gap-1">
                       {calendarDays.map((date, i) => {
-                        const dateStr        = formatDate(date)
+                        const dateStr        = formatDateLocal(date)
                         const isCurrentMonth = date.getMonth() === currentMonth.getMonth()
                         const isToday        = dateStr === today
                         const isPast         = dateStr < today

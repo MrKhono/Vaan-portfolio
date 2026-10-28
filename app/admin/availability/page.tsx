@@ -12,6 +12,7 @@ import {
   type TimeSlot,
 } from "@/actions/availability.actions"
 import { useToast } from "@/hooks/use-toast"
+import { toParisDateString, formatDateLocal } from "@/lib/utils"
 import { AvailabilityCalendar }        from "./availability-calendar"
 import { AvailabilitySidebar }         from "./availability-sidebar"
 import { AvailabilitySlotsDialog }     from "./availability-slots-dialog"
@@ -32,7 +33,7 @@ export default function AvailabilityPage() {
   const [isCopyingMonth, setIsCopyingMonth]     = useState(false)
   const { toast } = useToast()
 
-  const today = new Date().toISOString().split("T")[0]
+  const today = toParisDateString()
 
   async function loadAvailabilities() {
     const data = await getAvailabilitiesAction()
@@ -42,7 +43,7 @@ export default function AvailabilityPage() {
   useEffect(() => { loadAvailabilities() }, [])
 
   async function handleDateClick(date: Date) {
-    const dateStr  = date.toISOString().split("T")[0]
+    const dateStr  = formatDateLocal(date)
     const existing = await getAvailabilityForDateAction(dateStr)
     setSelectedDate(dateStr)
     setSlots(existing?.slots || [])

@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { ShieldCheck } from "lucide-react"
+import { formatMonth } from "@/lib/utils"
 
 interface ProfileCardProps {
   user: {
@@ -41,11 +42,7 @@ export default function ProfileCard({ user }: ProfileCardProps) {
           </div>
 
           <p className="mt-4 text-xs text-muted-foreground">
-            Membre depuis{" "}
-            {new Date(user.createdAt).toLocaleDateString("fr-FR", {
-              month: "long",
-              year: "numeric",
-            })}
+            Membre depuis {formatMonth(user.createdAt)}
           </p>
         </div>
       </CardContent>

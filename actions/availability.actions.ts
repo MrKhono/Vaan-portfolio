@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
-import { formatDateLocal, parseDateLocal } from "@/lib/utils"
+import { formatDateLocal, parseDateLocal, toParisDateString } from "@/lib/utils"
 
 export type TimeSlot = {
   start: string
@@ -127,10 +127,11 @@ export async function copyToDayOfMonthAction(
   try {
     await requireAuth()
 
-    const sourceDate  = new Date(date)
+    const sourceDate  = parseDateLocal(date)
     const dayOfWeek   = sourceDate.getDay() // 0 = dimanche, 1 = lundi, etc.
     const year        = sourceDate.getFullYear()
     const month       = sourceDate.getMonth()
+    const today       = toParisDateString()
 
     // Calcul de tous les jours du mois correspondant au même jour de la semaine
     const targetDates: string[] = []
@@ -139,9 +140,8 @@ export async function copyToDayOfMonthAction(
     for (let day = 1; day <= lastDay; day++) {
       const current = new Date(year, month, day)
       if (current.getDay() === dayOfWeek) {
-        const dateStr = current.toISOString().split("T")[0]
+        const dateStr = formatDateLocal(current)
         // On exclut les dates passées
-        const today = new Date().toISOString().split("T")[0]
         if (dateStr >= today) {
           targetDates.push(dateStr)
         }

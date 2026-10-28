@@ -7,11 +7,9 @@ import {
   Calendar, Clock, CalendarCheck,
   Mail, Phone, User, Check, X, Loader2,
 } from "lucide-react"
-import { cn, parseDateLocal } from "@/lib/utils"
+import { cn, parseDateLocal, formatDate, formatDateTime } from "@/lib/utils"
 import { STATUS_CONFIG } from "@/lib/status-config"
 import type { Appointment } from "@/actions/appointment.actions"
-
-
 
 interface AppointmentDetailsDialogProps {
   appointment: Appointment | null
@@ -30,11 +28,6 @@ export function AppointmentDetailsDialog({
   onConfirm,
   onReject,
 }: AppointmentDetailsDialogProps) {
-  const formatDate = (d: string) =>
-    parseDateLocal(d).toLocaleDateString("fr-FR", {
-      weekday: "short", day: "numeric", month: "short", year: "numeric",
-    })
-
   if (!appointment) return null
 
   const status     = STATUS_CONFIG[appointment.status as keyof typeof STATUS_CONFIG]
@@ -46,7 +39,7 @@ export function AppointmentDetailsDialog({
         <DialogHeader>
           <DialogTitle>Détails du rendez-vous</DialogTitle>
           <DialogDescription>
-            Demande reçue le {formatDate(appointment.createdAt.toString())}
+            Demande reçue le {formatDateTime(appointment.createdAt)}
           </DialogDescription>
         </DialogHeader>
 
@@ -86,7 +79,7 @@ export function AppointmentDetailsDialog({
           <div className="space-y-3">
             <h4 className="font-medium">Détails du rendez-vous</h4>
             {[
-              { icon: Calendar,      value: formatDate(appointment.date) },
+              { icon: Calendar,      value: formatDate(parseDateLocal(appointment.date)) },
               { icon: Clock,         value: `${appointment.slotStart} - ${appointment.slotEnd}` },
               { icon: CalendarCheck, value: appointment.serviceType },
             ].map(({ icon: Icon, value }) => (
