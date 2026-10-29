@@ -19,34 +19,36 @@ export async function GalleryPreview() {
           </h2>
         </FadeIn>
 
-        <StaggerContainer className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Masonry CSS columns — chaque photo garde son ratio naturel */}
+        <StaggerContainer className="columns-1 gap-4 sm:columns-2 sm:gap-5 lg:columns-3 lg:gap-6">
           {photos.map((photo, i) => (
-            <StaggerItem key={photo.id}>
+            <StaggerItem key={photo.id} className="mb-4 break-inside-avoid sm:mb-5 lg:mb-6">
               <Link
                 href="/portfolio"
-                className="group relative block overflow-hidden rounded-xl"
+                className="group relative block overflow-hidden rounded-xl bg-muted"
               >
-                <div className="aspect-square">
-                  <img
-                    src={photo.image}
-                    alt={photo.title || `Photo ${i + 1}`}
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                </div>
+                <img
+                  src={photo.image}
+                  alt={photo.title || `Photo ${i + 1}`}
+                  loading="lazy"
+                  className="h-auto w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+
+                {/* Overlay dégradé — toujours légèrement visible, intensifié au hover */}
+                <div className="absolute inset-0 bg-linear-to-t from-[#0F0F0F]/40 via-transparent to-transparent opacity-70 transition-opacity duration-500 group-hover:opacity-100" />
+
                 {(photo.title || photo.category) && (
-                  <div className="absolute inset-0 flex items-end bg-linear-to-t from-[#0F0F0F]/70 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-                    <div className="p-6">
-                      {photo.category && (
-                        <p className="text-xs font-medium uppercase tracking-wider text-[#D6C6B8]">
-                          {photo.category}
-                        </p>
-                      )}
-                      {photo.title && (
-                        <h3 className="mt-1 font-serif text-xl font-semibold text-[#F8F8F8]">
-                          {photo.title}
-                        </h3>
-                      )}
-                    </div>
+                  <div className="absolute inset-x-0 bottom-0 translate-y-2 p-5 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 md:p-6">
+                    {photo.category && (
+                      <p className="mb-1 text-xs font-medium uppercase tracking-[0.2em] text-[#D6C6B8]">
+                        {photo.category}
+                      </p>
+                    )}
+                    {photo.title && (
+                      <h3 className="font-serif text-lg font-semibold leading-tight text-[#F8F8F8] md:text-xl">
+                        {photo.title}
+                      </h3>
+                    )}
                   </div>
                 )}
               </Link>
